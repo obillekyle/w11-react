@@ -1,4 +1,4 @@
-import './App.css';
+import './App.scss';
 import { MantineProvider } from '@mantine/core';
 import _ from 'lodash';
 import { StoreProvider, useStore } from './api/store';

@@ -1,18 +1,31 @@
-import { useLocalStorage, useToggle } from "@mantine/hooks";
-import _ from "lodash";
-import { createContext, useCallback, useContext } from "react";
-import { getGroup, hasPermission, regKey } from "./permission";
-import superjson from "superjson";
-import { execute } from "./util";
+import { useLocalStorage, useToggle } from '@mantine/hooks';
+import _ from 'lodash';
+import { createContext, useCallback, useContext } from 'react';
+import { getGroup, hasPermission, regKey } from './permission';
+import superjson from 'superjson';
+import { execute } from './util';
 
 export type StoreType = {
   [key: string]: ObjectStore;
 };
 
-const StoreContext = createContext<UseStore>({
-  get$: (key, user, d) => d,
-  set$: (key, value, user) => {},
-  remove$: (key, user) => {},
+function getStore(key: string, user: string): ObjectStore | undefined;
+function getStore<T>(key: string, user: string, d: T): typeof d;
+function getStore(key: string, user: string, d?: any) {
+  return undefined as any;
+}
+function setStore(key: string, value: (v: any) => any, user: string): void;
+function setStore(key: string, value: ObjectStore, user: string): void;
+function setStore(key: string, value: any, user: string): void {}
+
+function remStore(key: string, user: string) {
+  return undefined as any;
+}
+
+const StoreContext = createContext({
+  get$: getStore,
+  set$: setStore,
+  remove$: remStore,
 });
 
 export const useStore = () => useContext(StoreContext);
@@ -26,13 +39,13 @@ export const default_store = {
     boot_times: 0,
     is_boot: 1,
 
-    current_user: "Administrator",
+    current_user: 'Administrator',
   },
   profiles: {
-    system: ["system", "trustedinstaller"],
-    administrators: ["administrator", "user"],
+    system: ['system', 'trustedinstaller'],
+    administrators: ['administrator', 'user'],
   },
-  "+Win!~": {
+  '+Win!~': {
     // encoded base64 keys
     // _ is permissions
     // $o: "owner",
@@ -45,42 +58,42 @@ export const default_store = {
     // w - write
     // x - read & execute
 
-    "c2V0dGluZ3M=": {
+    'c2V0dGluZ3M=': {
       _: {
-        $o: "system",
-        administrators: "dlrwx",
-        users: "dlrwx",
+        $o: 'system',
+        administrators: 'dlrwx',
+        users: 'dlrwx',
       },
     },
 
-    "cmVnaXN0cnk=": {
+    'cmVnaXN0cnk=': {
       _: {
-        $o: "system",
-        system: "dlrwx",
-        administrators: "dlrwx",
+        $o: 'system',
+        system: 'dlrwx',
+        administrators: 'dlrwx',
       },
     },
-    "dXNlcnM=": {
+    'dXNlcnM=': {
       _: {
-        $o: "TrustedInstaller",
-        TrustedInstaller: "dlrwx",
-        system: "dlrwx",
-        administrators: "-lrwx",
+        $o: 'TrustedInstaller',
+        TrustedInstaller: 'dlrwx',
+        system: 'dlrwx',
+        administrators: '-lrwx',
       },
     },
-    "cHJvZmlsZXM=": {
+    'cHJvZmlsZXM=': {
       _: {
-        $o: "TrustedInstaller",
-        TrustedInstaller: "dlrwx",
-        system: "dlrwx",
-        administrators: "-lrwx",
+        $o: 'TrustedInstaller',
+        TrustedInstaller: 'dlrwx',
+        system: 'dlrwx',
+        administrators: '-lrwx',
       },
     },
     c3lzdGVt: {
       _: {
-        $o: "system",
-        system: "dlrwx",
-        everyone: "--r-x",
+        $o: 'system',
+        system: 'dlrwx',
+        everyone: '--r-x',
       },
     },
   },
@@ -94,8 +107,10 @@ export type ObjectStore =
   | ObjectStore[]
   | { [key: string]: ObjectStore };
 
+const a = getStore('1', '1', 1);
+
 type UseStore = {
-  get$: (key: string, user: string, d?: ObjectStore) => ObjectStore | undefined;
+  get$: typeof getStore;
   set$: (
     key: string,
     fn: ObjectStore | ((v: any) => any),
@@ -107,21 +122,21 @@ type UseStore = {
 export const StoreProvider = ({ children }: any) => {
   const [i, u] = useToggle();
   const [store, setStore] = useLocalStorage<StoreType>({
-    key: "store",
+    key: 'store',
     defaultValue: default_store,
     deserialize: (v) => (v === undefined ? default_store : superjson.parse(v)),
   });
 
-  const get$ = (key: string, user: string, d: any) => {
-    return hasPermission("r", store, key, user)
+  const get$ = (key: string, user: string, d?: any) => {
+    return hasPermission('r', store, key, user)
       ? _.get(store, key, d)
       : undefined;
   };
 
   const set$ = (key: string, fn: any, user: string) => {
-    if (!hasPermission("w", store, key, user)) return;
-    const elevated = user.includes("^");
-    user = user.replace("^", "");
+    if (!hasPermission('w', store, key, user)) return;
+    const elevated = user.includes('^');
+    user = user.replace('^', '');
     const owner = elevated ? getGroup(store, user) : user;
     setStore((o: StoreType) => {
       const v = execute(fn, _.get(o, key));
@@ -129,11 +144,11 @@ export const StoreProvider = ({ children }: any) => {
       const b = _.set(a, regKey(key), {
         _: {
           $o: owner,
-          system: "dlrwx",
-          [owner]: "dlrwx",
+          system: 'dlrwx',
+          [owner]: 'dlrwx',
         },
       });
-      console.log(b, key)
+      console.log(b, key);
       return b;
     });
 
@@ -141,7 +156,7 @@ export const StoreProvider = ({ children }: any) => {
   };
 
   const remove$ = (key: string, user: string) => {
-    hasPermission("w", store, key, user);
+    hasPermission('w', store, key, user);
     setStore((o: StoreType) => {
       _.unset(o, [key, regKey(key)]);
       return o;

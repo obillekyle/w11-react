@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react';
 import { Button, Select, SelectProps, Slider } from '@mantine/core';
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 import { useStore } from '../../api/store';
 import { v } from '../../api/util';
 import ProgressRing from '../../UI/progress';
@@ -16,9 +16,11 @@ const test = {
 
 function App() {
   const store = useStore();
-  const scale = store.get$('settings.scaling', 'user', 1) as number;
-  const timing = store.get$('settings.timing', 'user', 1) as number;
+  const scale = store.get$('settings.scaling', 'user', 1);
+  const timing = store.get$('settings.timing', 'user', 1);
   const application = useApplication();
+
+  const [ring, setRing] = useState<[number, number]>([48, 6]);
 
   const setScale = (s: number) => store.set$('settings.scaling', s, 'user');
   const setTiming = (t: number) => store.set$('settings.timing', t, 'user');
@@ -75,18 +77,53 @@ function App() {
           </div>
         </div>
       </div>
+      <div className="list-item">
+        <Icon icon="fluent:arrow-autofit-width-24-regular" className="icon" />
+        <div className="heading">
+          <div className="title">Progress Ring size</div>
+          <div className="sub">The size of the progress ring</div>
+        </div>
+        <div className="right">
+          <div className="right">
+            <CDrop
+              data={['32', '48', '64', '96']}
+              value={ring[0] + ''}
+              onChange={(v) => setRing((r) => [parseInt(v!), r[1]])}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="list-item">
+        <Icon icon="fluent:arrow-autofit-content-24-regular" className="icon" />
+        <div className="heading">
+          <div className="title">Progress Ring thickness</div>
+          <div className="sub">The thickness of the progress ring</div>
+        </div>
+        <div className="right">
+          <div className="right">
+            <CDrop
+              data={['2', '4', '6', '8', '10']}
+              value={ring[1] + ''}
+              onChange={(v) => setRing((r) => [r[0], parseInt(v!)])}
+            />
+          </div>
+        </div>
+      </div>
 
-      <ProgressRing size={64} thickness={5} reducedShaking />
+      <ProgressRing size={ring[0]} thickness={ring[1]} reducedShaking />
     </div>
   );
 }
 
 const CDrop = (props: SelectProps) => {
+  const store = useStore();
+  const timing = store.get$('settings.timing', 'user', 1);
+
   return (
     <Select
       withinPortal
       transition="scale-y"
-      transitionDuration={200}
+      transitionDuration={200 / timing}
       maxDropdownHeight={innerHeight - 90}
       transitionTimingFunction="ease-out"
       styles={(e) => ({

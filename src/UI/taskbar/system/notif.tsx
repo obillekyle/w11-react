@@ -9,7 +9,7 @@ const NotificationMenu = () => {
 
   useEffect(() => {
     interval.start();
-    return interval.stop();
+    return interval.stop;
   });
 
   return (

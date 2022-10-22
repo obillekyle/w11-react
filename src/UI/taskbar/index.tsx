@@ -56,7 +56,7 @@ const Tp = ({ label, children }: TaskbarTooltip) => {
       transitionDuration={400}
       styles={{
         tooltip: {
-          fontSize: 12 * (scale as number),
+          fontSize: 12 * scale,
           textAlign: "left",
           background: "rgba(33, 33, 33, var(--taskbar-opacity, 1))",
           backdropFilter: "blur(20px)",

@@ -1,4 +1,4 @@
-@import "../api/util";
+@import '../api/util';
 
 .progress-ring {
   animation: bruh infinite t(1s) linear;
@@ -11,4 +11,12 @@
   100% {
     transform: rotate(360deg);
   }
+}
+
+.ring-root {
+  overflow: hidden;
+  width: v(var(--ring-width, 48px));
+  height: v(var(--ring-width, 48px));
+  max-width: v(var(--ring-width, 48px));
+  max-height: v(var(--ring-width, 48px));
 }
