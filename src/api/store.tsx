@@ -108,7 +108,6 @@ export const StoreProvider = ({ children }: any) => {
   const [i, u] = useToggle();
   const [store, setStore] = useLocalStorage<StoreType>({
     key: "store",
-    getInitialValueInEffect: true,
     defaultValue: default_store,
     deserialize: (v) => (v === undefined ? default_store : superjson.parse(v)),
   });
@@ -134,6 +133,7 @@ export const StoreProvider = ({ children }: any) => {
           [owner]: "dlrwx",
         },
       });
+      console.log(b, key)
       return b;
     });
 
