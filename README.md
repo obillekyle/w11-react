@@ -15,9 +15,9 @@ A *(probably)* bad clone of Windows 11 for the web, created using the ReactJS Fr
 
 ## Features
 
-- [/] Desktop
-- [/] Window open, resize, maximize, close, etc...
-- [/] Window previews
+- [x] Desktop
+- [x] Window open, resize, maximize, close, etc...
+- [x] Window previews
 - [ ] Pinning Apps
 - [ ] Start Menu & Search
 - [ ] Context Menus
@@ -53,7 +53,7 @@ Working only on chromium based browsers
 - All contributions are welcome as long as
   - it doesn't contains breaking changes
   - improves code quality
-  - replace ternary operators into "something better"
+  - does not replace ternary operators into "something better"
 
 ## Preview
 
