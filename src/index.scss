@@ -1,0 +1,28 @@
+@import "./api/util";
+
+@font-face {
+  font-family: "Segoe UI Variable";
+  src: url("/assets/SegoeUI-VF.ttf");
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-font-smooting: grayscale;
+  font-optical-sizing: none;
+  font-variant-ligatures: normal;
+  line-height: 1.5;
+  font-weight: 100 900;
+}
+
+*,
+*::before,
+*::after {
+  margin: none;
+  padding: none;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI Variable";
+  color: white;
+  font-size: v(12px);
+  overflow: hidden;
+}

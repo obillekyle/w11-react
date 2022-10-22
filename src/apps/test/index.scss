@@ -1,0 +1,35 @@
+@import '../../api/util';
+
+.test-frame {
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+
+  .list-item {
+    border-radius: 6px;
+    background: #8080802c;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: v(16px);
+    min-height: v(64px);
+    padding: v(14px) v(16px);
+    border: 1px solid #212121;
+    .icon {
+      width: v(24px);
+      height: v(24px);
+    }
+    .heading {
+      margin-right: auto;
+      display: grid;
+      .title {
+        font-size: v(13px);
+      }
+      .sub {
+        color: gainsboro;
+      }
+    }
+    .right {
+    }
+  }
+}

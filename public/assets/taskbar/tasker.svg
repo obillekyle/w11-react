@@ -1,0 +1,26 @@
+<svg width="1em" height="1em" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" class="task">
+  <g class="top">
+    <mask id="path-1-inside-1_106_19" fill="white">
+      <path
+        d="M5 1C5 0.447715 5.44772 0 6 0H22C22.5523 0 23 0.447715 23 1V15C23 15.5523 22.5523 16 22 16H6C5.44772 16 5 15.5523 5 15V1Z" />
+    </mask>
+    <path
+      d="M5 1C5 0.447715 5.44772 0 6 0H22C22.5523 0 23 0.447715 23 1V15C23 15.5523 22.5523 16 22 16H6C5.44772 16 5 15.5523 5 15V1Z"
+      fill="white" fill-opacity="0.95" />
+    <path
+      d="M5 0H23H5ZM23 15C23 16.1046 22.1046 17 21 17H7C5.89543 17 5 16.1046 5 15C5 15 5.44772 15 6 15H22C22.5523 15 23 15 23 15ZM5 16V0V16ZM23 0V16V0Z"
+      fill="#A4A4A4" fill-opacity="0.4" mask="url(#path-1-inside-1_106_19)" />
+  </g>
+  <g class="bottom">
+    <mask id="path-3-inside-2_106_19" fill="white">
+      <path
+        d="M0 7C0 6.44772 0.447715 6 1 6H18C18.5523 6 19 6.44772 19 7V21C19 21.5523 18.5523 22 18 22H1C0.447715 22 0 21.5523 0 21V7Z" />
+    </mask>
+    <path
+      d="M0 7C0 6.44772 0.447715 6 1 6H18C18.5523 6 19 6.44772 19 7V21C19 21.5523 18.5523 22 18 22H1C0.447715 22 0 21.5523 0 21V7Z"
+      fill="#6F6F6F" fill-opacity="0.5" />
+    <path
+      d="M0 6H19H0ZM19 21C19 22.1046 18.1046 23 17 23H2C0.895431 23 0 22.1046 0 21C0 21 0.447715 21 1 21H18C18.5523 21 19 21 19 21ZM0 22V6V22ZM19 6V22V6Z"
+      fill="#5c5c5c" fill-opacity="0.2" mask="url(#path-3-inside-2_106_19)" />
+  </g>
+</svg>

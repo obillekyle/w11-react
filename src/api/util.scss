@@ -1,0 +1,38 @@
+@function v($var) {
+  @return calc($var * var(--scaling, 1));
+}
+
+@function t($var) {
+  @return calc($var / var(--timing, 1));
+}
+
+@mixin transparent($pos: center, $x: null, $y: null, $o: 0.9, $i: 20px) {
+  &::before,
+  &::after {
+    position: absolute;
+    content: '';
+    inset: 0 0 0 0;
+  }
+
+  &::before {
+    width: 100vw;
+    height: 100vh;
+    background: var(--wp);
+    background-size: cover;
+    background-position: $pos;
+    z-index: -2;
+    @if $x or $y {
+      top: calc(var(--y, $y) * -1);
+      left: calc(var(--x, $x) * -1);
+    }
+  }
+  &::after {
+    z-index: -1;
+    background-color: rgb(33, 33, 33, $o);
+    backdrop-filter: blur($i);
+  }
+  &,
+  .app-frame {
+    background: none !important;
+  }
+}
