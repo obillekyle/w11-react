@@ -14,12 +14,14 @@ function getStore<T>(key: string, user: string, d: T): typeof d;
 function getStore(key: string, user: string, d?: any) {
   return undefined as any;
 }
-function setStore(key: string, value: (v: any) => any, user: string): void;
-function setStore(key: string, value: ObjectStore, user: string): void;
-function setStore(key: string, value: any, user: string): void {}
+function setStore(key: string, value: (v: any) => any, user: string): boolean;
+function setStore(key: string, value: ObjectStore, user: string): boolean;
+function setStore(key: string, value: any, user: string): boolean {
+  return false;
+}
 
 function remStore(key: string, user: string) {
-  return undefined as any;
+  return false;
 }
 
 const StoreContext = createContext({
@@ -109,16 +111,6 @@ export type ObjectStore =
 
 const a = getStore('1', '1', 1);
 
-type UseStore = {
-  get$: typeof getStore;
-  set$: (
-    key: string,
-    fn: ObjectStore | ((v: any) => any),
-    user: string
-  ) => void;
-  remove$: (key: string, user: string) => void;
-};
-
 export const StoreProvider = ({ children }: any) => {
   const [i, u] = useToggle();
   const [store, setStore] = useLocalStorage<StoreType>({
@@ -127,40 +119,38 @@ export const StoreProvider = ({ children }: any) => {
     deserialize: (v) => (v === undefined ? default_store : superjson.parse(v)),
   });
 
-  const get$ = (key: string, user: string, d?: any) => {
-    return hasPermission('r', store, key, user)
-      ? _.get(store, key, d)
-      : undefined;
+  const get$ = (key: string, user: string, d: any = undefined) => {
+    return hasPermission('r', store, key, user) ? _.get(store, key, d) : d;
   };
 
   const set$ = (key: string, fn: any, user: string) => {
-    if (!hasPermission('w', store, key, user)) return;
+    if (!hasPermission('w', store, key, user)) return false;
     const elevated = user.includes('^');
     user = user.replace('^', '');
     const owner = elevated ? getGroup(store, user) : user;
     setStore((o: StoreType) => {
       const v = execute(fn, _.get(o, key));
       const a = _.set(o, key, v);
-      const b = _.set(a, regKey(key), {
+      return _.set(a, regKey(key), {
         _: {
           $o: owner,
           system: 'dlrwx',
           [owner]: 'dlrwx',
         },
       });
-      console.log(b, key);
-      return b;
     });
-
     u();
+    return true;
   };
 
   const remove$ = (key: string, user: string) => {
-    hasPermission('w', store, key, user);
+    const perm = hasPermission('w', store, key, user);
+    if (perm) return false;
     setStore((o: StoreType) => {
       _.unset(o, [key, regKey(key)]);
       return o;
     });
+    return true;
   };
 
   return (

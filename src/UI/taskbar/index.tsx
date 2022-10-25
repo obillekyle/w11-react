@@ -5,13 +5,13 @@ import {
   Popover,
   PopoverBaseProps,
   Tooltip,
-} from "@mantine/core";
-import { forwardRef, HTMLAttributes, ReactNode, useState } from "react";
-import { useStore } from "../../api/store";
-import SystemTaskbar from "./../taskbar/system";
-import Widget from "./../taskbar/widget";
-import Tasker from "./tasker";
-import "./index.scss";
+} from '@mantine/core';
+import { forwardRef, HTMLAttributes, ReactNode, useState } from 'react';
+import { useStore } from '../../api/store';
+import SystemTaskbar from './../taskbar/system';
+import Widget from './../taskbar/widget';
+import Tasker from './tasker';
+import './index.scss';
 
 type TaskbarButton = {
   active?: boolean;
@@ -26,9 +26,9 @@ const Btn = forwardRef<HTMLButtonElement, TaskbarButton>(
         <button
           {...props}
           ref={ref}
-          className={clsx("taskbar-button", props.className)}
+          className={clsx('taskbar-button', props.className)}
         >
-          <div className={clsx("button", active && "active")}>
+          <div className={clsx('button', active && 'active')}>
             <div className="container">{children}</div>
           </div>
         </button>
@@ -44,7 +44,8 @@ type TaskbarTooltip = {
 
 const Tp = ({ label, children }: TaskbarTooltip) => {
   const store = useStore();
-  const scale = store.get$("settings.scaling", "system", 1);
+  const scale = store.get$('settings.scaling', 'system', 1);
+  const timed = store.get$('settings.timing', 'system', 1);
 
   return (
     <Tooltip
@@ -52,15 +53,14 @@ const Tp = ({ label, children }: TaskbarTooltip) => {
       label={label}
       withinPortal
       offset={16}
-      openDelay={1200}
-      transitionDuration={400}
+      transitionDuration={400 / timed}
       styles={{
         tooltip: {
           fontSize: 12 * scale,
-          textAlign: "left",
-          background: "rgba(33, 33, 33, var(--taskbar-opacity, 1))",
-          backdropFilter: "blur(20px)",
-          boxShadow: "0 2px 5px #0005",
+          textAlign: 'left',
+          background: 'rgba(33, 33, 33, var(--taskbar-opacity, 1))',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 2px 5px #0005',
         },
       }}
     >
@@ -91,8 +91,8 @@ const Po = ({
 
   const style = {
     transitionDelay: `${transitionDelay}ms`,
-    background: "transparent",
-    border: "none",
+    background: 'transparent',
+    border: 'none',
     borderRadius: 0,
     padding: 0,
   };
@@ -109,7 +109,13 @@ const Po = ({
   }
 
   return (
-    <Popover {...props} onClose={close} withinPortal>
+    <Popover
+      opened={open}
+      onOpen={() => setOpen(true)}
+      {...props}
+      onClose={close}
+      withinPortal
+    >
       <Popover.Target>
         <div className="popover">{target}</div>
       </Popover.Target>
@@ -120,8 +126,10 @@ const Po = ({
 };
 
 const Taskbar = () => {
+  const store = useStore();
+  const timed = store.get$('settings.scaling', 'system', 1);
   return (
-    <Tooltip.Group closeDelay={300}>
+    <Tooltip.Group closeDelay={300 / timed} openDelay={1200 / timed}>
       <div className="taskbar-main">
         <Widget />
         <Tasker />

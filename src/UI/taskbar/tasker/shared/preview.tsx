@@ -57,7 +57,6 @@ const PreviewItem = ({ window, id }: PreviewProps) => {
 
   useLayoutEffect(() => {
     const frame = document.querySelector(`[data-uid^="${id}"]`);
-    console.log(frame);
     if (!frame) return;
 
     const svgDocument = elementToSVG(frame, { keepLinks: false });
