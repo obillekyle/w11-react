@@ -22,7 +22,7 @@ const ProgressRing = ({
       if (w[0] <= 5) return [w[0] + timed, true];
       return [w[0] + (w[1] ? timed : -timed), w[1]];
     });
-  }, 64 * speed);
+  }, 48 * timed);
 
   useEffect(() => {
     interval.start();

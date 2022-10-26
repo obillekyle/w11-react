@@ -6,7 +6,7 @@
   @return calc($var / var(--timing, 1));
 }
 
-@mixin transparent($pos: center, $x: null, $y: null, $o: 0.9, $i: 20px) {
+@mixin transparent($pos: center, $x: null, $y: null, $o: 0.9, $i: 100px) {
   &::before,
   &::after {
     position: absolute;

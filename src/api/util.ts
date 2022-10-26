@@ -32,3 +32,8 @@ export function t(v: number | string) {
   const isNumber = typeof v == 'number';
   return `calc(${isNumber ? v + 'px' : v} / var(--timing, 1))`;
 }
+
+export function cx(...args: (string | number | null | boolean | undefined)[]) {
+  const filtered = args.filter((v) => v != null);
+  return filtered.join(' ');
+}
