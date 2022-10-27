@@ -248,20 +248,16 @@ export const WindowManager = ({ children }: any) => {
         },
 
         set value(v) {
-          setValue((s) => _.setWith(s, [...path, 'state'], v));
+          setValue((s) => _.setWith(s, path, v));
         },
         set maximized(bool) {
-          setValue((v) =>
-            _.setWith(v, [...path, 'state'], sV(bool, 'maximized'))
-          );
+          setValue((v) => _.setWith(v, path, sV(bool, 'maximized')));
         },
         set hidden(bool) {
-          setValue((v) => _.setWith(v, [...path, 'state'], sV(bool, 'hidden')));
+          setValue((v) => _.setWith(v, path, sV(bool, 'hidden')));
         },
         set minimized(bool) {
-          setValue((v) =>
-            _.setWith(v, [...path, 'state'], sV(bool, 'minimized'))
-          );
+          setValue((v) => _.setWith(v, path, sV(bool, 'minimized')));
         },
       };
     },
@@ -269,8 +265,6 @@ export const WindowManager = ({ children }: any) => {
       const id = wid.split('_');
       const path = ['opened', id[0], 'windows', '_' + id[1]];
       const object = _.get(w, path);
-
-      console.log(object);
 
       return {
         get title() {
