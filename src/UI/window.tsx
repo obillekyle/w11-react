@@ -80,6 +80,10 @@ type AppType = (wid: string) => {
     hidden: boolean;
     minimized: boolean;
   };
+  readonly window: {
+    title: string;
+    icon: string;
+  };
 };
 
 const default_windows: DefaultWindow = {
@@ -223,15 +227,15 @@ export const WindowManager = ({ children }: any) => {
     get state() {
       const id = wid.split('_');
       const path = ['opened', id[0], 'windows', '_' + id[1], 'state'];
-      const array: States = _.get(w, path, []);
+      const state: States = _.get(w, path, []);
 
       const sV = (v: boolean, s: string) => {
-        return v ? [...array, s] : array.filter((s) => s != 'maximized');
+        return v ? [...state, s] : state.filter((s) => s != 'maximized');
       };
 
       return {
         get value() {
-          return array;
+          return state;
         },
         get maximized() {
           return this.value.includes('maximized') as boolean;
@@ -244,16 +248,44 @@ export const WindowManager = ({ children }: any) => {
         },
 
         set value(v) {
-          setValue((s) => _.setWith(s, path, v));
+          setValue((s) => _.setWith(s, [...path, 'state'], v));
         },
         set maximized(bool) {
-          setValue((v) => _.setWith(v, path, sV(bool, 'maximized')));
+          setValue((v) =>
+            _.setWith(v, [...path, 'state'], sV(bool, 'maximized'))
+          );
         },
         set hidden(bool) {
-          setValue((v) => _.setWith(v, path, sV(bool, 'hidden')));
+          setValue((v) => _.setWith(v, [...path, 'state'], sV(bool, 'hidden')));
         },
         set minimized(bool) {
-          setValue((v) => _.setWith(v, path, sV(bool, 'minimized')));
+          setValue((v) =>
+            _.setWith(v, [...path, 'state'], sV(bool, 'minimized'))
+          );
+        },
+      };
+    },
+    get window() {
+      const id = wid.split('_');
+      const path = ['opened', id[0], 'windows', '_' + id[1]];
+      const object = _.get(w, path);
+
+      console.log(object);
+
+      return {
+        get title() {
+          return object.name ?? '';
+        },
+        set title(a: string) {
+          if (object.name == a) return;
+          setValue((v) => _.setWith(v, [...path, 'name'], a));
+        },
+        get icon() {
+          return object.icon ?? '';
+        },
+        set icon(a: string) {
+          if (object.icon == a) return;
+          setValue((v) => _.set(v, [...path, 'title'], a));
         },
       };
     },

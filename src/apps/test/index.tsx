@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react';
-import { Button, Select, SelectProps, Slider } from '@mantine/core';
+import { Button, Select, SelectProps, Slider, TextInput } from '@mantine/core';
 import { forwardRef, useState } from 'react';
 import { useStore } from '../../api/store';
 import { v } from '../../api/util';
@@ -29,6 +29,21 @@ function App() {
 
   return (
     <div className="test-frame">
+      <div className="list-item">
+        <Icon icon="fluent:app-title-24-regular" className="icon" />
+        <div className="heading">
+          <div className="title">App title</div>
+          <div className="sub">Window app title, Not permanent</div>
+        </div>
+        <div className="right">
+          <div className="right">
+            <TextInput
+              defaultValue={application.window.title}
+              onChange={(v) => (application.window.title = v.target.value)}
+            />
+          </div>
+        </div>
+      </div>
       <div className="list-item">
         <div className="icon">
           <Icon icon="fluent:scale-fill-24-regular" className="icon" />
