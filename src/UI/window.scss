@@ -1,6 +1,7 @@
 @import '../api/util';
 
 .app-window {
+  --header-height: 30px;
   font-size: v(12px);
   position: absolute;
   min-width: v(400px);
@@ -16,7 +17,7 @@
   will-change: inset;
   isolation: isolate;
 
-  @include transparent(center, var(--x, 0px), var(--y, 0px));
+  @include wp-transparent(center, var(--x, 0px), var(--y, 0px));
 
   .app-header {
     height: v(var(--header-height, 30px));
@@ -35,6 +36,7 @@
 
   .actions {
     height: v(30px);
+    align-self: baseline;
     display: flex;
     margin-left: auto;
 

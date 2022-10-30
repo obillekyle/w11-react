@@ -1,38 +1,39 @@
-import { useLocalStorage, useToggle } from '@mantine/hooks';
 import _ from 'lodash';
-import { createContext, useCallback, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { getGroup, hasPermission, regKey } from './permission';
-import superjson from 'superjson';
 import { execute } from './util';
+import { useLocalStorage } from 'usehooks-ts';
 
 export type StoreType = {
+  readonly settings: ObjectStore;
+  readonly registry: ObjectStore;
+  readonly profiles: ObjectStore;
+  readonly system: ObjectStore;
+  readonly users: ObjectStore;
   [key: string]: ObjectStore;
 };
 
-function getStore(key: string, user: string): ObjectStore | undefined;
-function getStore<T>(key: string, user: string, d: T): typeof d;
-function getStore(key: string, user: string, d?: any) {
-  return undefined as any;
-}
-function setStore(key: string, value: (v: any) => any, user: string): boolean;
-function setStore(key: string, value: ObjectStore, user: string): boolean;
-function setStore(key: string, value: any, user: string): boolean {
-  return false;
-}
+type UseStore = {
+  get$: {
+    (key: string, user: string): ObjectStore | undefined;
+    <T>(key: string, user: string, d: T): T;
+  };
+  set$: {
+    (key: string, value: (v: any) => any, user: string): boolean;
+    (key: string, value: ObjectStore, user: string): boolean;
+  };
+  remove$: (key: string, user: string) => boolean;
+};
 
-function remStore(key: string, user: string) {
-  return false;
-}
-
-const StoreContext = createContext({
-  get$: getStore,
-  set$: setStore,
-  remove$: remStore,
+const StoreContext = createContext<UseStore>({
+  get$: (() => {}) as any,
+  set$: (() => {}) as any,
+  remove$: (() => {}) as any,
 });
 
 export const useStore = () => useContext(StoreContext);
 
-export const default_store = {
+export const default_store: StoreType = {
   settings: {},
   registry: {},
   users: {},
@@ -109,15 +110,8 @@ export type ObjectStore =
   | ObjectStore[]
   | { [key: string]: ObjectStore };
 
-const a = getStore('1', '1', 1);
-
 export const StoreProvider = ({ children }: any) => {
-  const [i, u] = useToggle();
-  const [store, setStore] = useLocalStorage<StoreType>({
-    key: 'store',
-    defaultValue: default_store,
-    deserialize: (v) => (v === undefined ? default_store : superjson.parse(v)),
-  });
+  const [store, setStore] = useLocalStorage<StoreType>('store', default_store);
 
   const get$ = (key: string, user: string, d: any = undefined) => {
     return hasPermission('r', store, key, user) ? _.get(store, key, d) : d;
@@ -128,18 +122,18 @@ export const StoreProvider = ({ children }: any) => {
     const elevated = user.includes('^');
     user = user.replace('^', '');
     const owner = elevated ? getGroup(store, user) : user;
-    setStore((o: StoreType) => {
+    setStore((o) => {
       const v = execute(fn, _.get(o, key));
       const a = _.set(o, key, v);
-      return _.set(a, regKey(key), {
+      const f = _.set(a, regKey(key), {
         _: {
           $o: owner,
           system: 'dlrwx',
           [owner]: 'dlrwx',
         },
       });
+      return f;
     });
-    u();
     return true;
   };
 
@@ -154,7 +148,13 @@ export const StoreProvider = ({ children }: any) => {
   };
 
   return (
-    <StoreContext.Provider value={{ ...store, get$, set$, remove$ }}>
+    <StoreContext.Provider
+      value={{
+        get$,
+        set$,
+        remove$,
+      }}
+    >
       {children}
     </StoreContext.Provider>
   );

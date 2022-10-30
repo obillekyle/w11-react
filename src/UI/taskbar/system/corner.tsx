@@ -1,4 +1,4 @@
-import Taskbar from "../../taskbar";
+import Taskbar from '..';
 
 const ShowDesktop = () => {
   return (

@@ -1,5 +1,11 @@
-import _ from 'lodash';
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import _, { add } from 'lodash';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useStore } from '../../../api/store';
 import { useDWM } from '../../window';
 import SearchButton from './internal/search';
@@ -19,10 +25,11 @@ const Tasker = () => {
   const wm = useDWM();
   const store = useStore();
   const [ap, setAp] = useState<PinProps[]>([]);
-
   const [w] = wm.window;
-
-  const pinned = store.get$('taskbar.pinned', 'user', ['test']) as string[];
+  const pinned = useMemo(
+    () => store.get$('taskbar.pinned', 'user', ['test', 'chrome']),
+    [store]
+  );
 
   const getPinned = useCallback(async () => {
     const pin = pinned.map(async (p) => {
@@ -52,12 +59,12 @@ const Tasker = () => {
       <SearchButton />
       <TaskView />
       <Widget />
-      {_.map(ap, (app, i) => (
-        <Preview app={app} o={app.id} p={true} />
+      {_.map(ap, (app, o) => (
+        <Preview app={app} o={app.id} key={o} p={true} />
       ))}
       {_.map(w.opened, (app, o) => {
         if (app.exec in pinned) return null;
-        <Preview app={app} o={o} />;
+        <Preview app={app} o={o.split('_')[0]} key={o} />;
       })}
     </div>
   );

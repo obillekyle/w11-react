@@ -1,4 +1,4 @@
-import { HTMLAttributes } from 'react';
+import { forwardRef, HTMLAttributes } from 'react';
 
 export type IconProps = {
   icon: string;
@@ -7,22 +7,23 @@ export type IconProps = {
   fontSize?: string | number;
 } & HTMLAttributes<SVGSVGElement>;
 
-export const Icon = ({
-  icon,
-  size = 'auto',
-  style,
-  color = 'currentColor',
-  fontSize,
-  ...props
-}: IconProps) => {
-  <svg
-    {...props}
-    data-src={`/assets/icons/${icon ?? 'f'}.svg`}
-    color={color}
-    width={size}
-    height={size}
-    style={{ ...style, fontSize }}
-  />;
-};
+export const Icon = forwardRef<SVGSVGElement, IconProps>(
+  (
+    { icon, size = 'auto', style, color = 'currentColor', fontSize, ...props },
+    ref
+  ) => {
+    return (
+      <svg
+        ref={ref}
+        {...props}
+        data-src={`/assets/icons/${icon ?? 'f'}.svg`}
+        color={color}
+        width={size}
+        height={size}
+        style={{ ...style, fontSize }}
+      />
+    );
+  }
+);
 
 export default Icon;

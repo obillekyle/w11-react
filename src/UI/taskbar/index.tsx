@@ -7,9 +7,9 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { forwardRef, HTMLAttributes, ReactNode, useState } from 'react';
-import { useStore } from '../../api/store';
-import SystemTaskbar from './../taskbar/system';
-import Widget from './../taskbar/widget';
+import { useStore } from '#api/store';
+import SystemTaskbar from './system';
+import Widget from './widget';
 import Tasker from './tasker';
 import './index.scss';
 
@@ -52,7 +52,7 @@ const Tp = ({ label, children }: TaskbarTooltip) => {
       disabled={!label}
       label={label}
       withinPortal
-      offset={16}
+      offset={19 * scale}
       transitionDuration={400 / timed}
       styles={{
         tooltip: {
@@ -128,6 +128,7 @@ const Po = ({
 const Taskbar = () => {
   const store = useStore();
   const timed = store.get$('settings.scaling', 'system', 1);
+
   return (
     <Tooltip.Group closeDelay={300 / timed} openDelay={1200 / timed}>
       <div className="taskbar-main">

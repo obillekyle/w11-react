@@ -1,35 +1,40 @@
 @import '../../api/util';
 
 .test-frame {
-  padding: 12px;
-  display: grid;
-  gap: 12px;
+  padding: v(12px);
+  max-width: v(1080px);
+  margin-inline: auto;
 
-  .list-item {
-    border-radius: 6px;
-    background: #8080802c;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: v(16px);
-    min-height: v(64px);
-    padding: v(14px) v(16px);
-    border: 1px solid #212121;
-    .icon {
-      width: v(24px);
-      height: v(24px);
-    }
-    .heading {
-      margin-right: auto;
-      display: grid;
-      .title {
-        font-size: v(13px);
+  .list {
+    display: grid;
+    gap: v(2px);
+    .list-item {
+      border-radius: v(6px);
+      background: #8080802c;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: v(16px);
+      min-height: v(64px);
+      padding: v(14px) v(16px);
+      border: v(1px) solid #212121;
+      .icon {
+        width: v(24px);
+        height: v(24px);
       }
-      .sub {
-        color: gainsboro;
+      .heading {
+        margin-right: auto;
+        display: grid;
+        .title {
+          font-size: v(13px);
+        }
+        .sub {
+          color: gainsboro;
+        }
       }
-    }
-    .right {
+      .right {
+        margin-left: auto;
+      }
     }
   }
 }

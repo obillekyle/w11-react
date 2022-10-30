@@ -371,7 +371,7 @@ const AppWindow = ({ name, icon, children, id, ...props }: AppProps) => {
             </div>
           </div>
         </div>
-        <div className="app-frame">{children}</div>
+        <div className="app-frame w11-scroll">{children}</div>
 
         {!app.state.maximized && (
           <>

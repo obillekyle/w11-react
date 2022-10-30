@@ -1,21 +1,5 @@
 @import '../../api/util';
 
-/*
-  TODO Fix layout
-  TODO Add vars
-  ✅  --taskbar-opacity,
-  ✅  --taskbar-location,
-  ✅  --taskbar-color,
-  ✅  --taskbar-height,
-
-    --search-color-<#>,
-    --start-color-<#>,
-
-    --scaling
-    --timing
-
-    
-*/
 
 .taskbar-main {
   @include transparent('center', 100%, 0, 0.6);
@@ -310,6 +294,21 @@
     &.focused {
       background: rgb(40, 40, 40, calc(var(--taskbar-opacity, 1)));
     }
+    > .header .close {
+      display: none;
+      margin-left: auto;
+      margin-block: v(-6px);
+      padding: v(2px) v(6px);
+      border-radius: v(2px);
+      align-items: center;
+      height: v(16px);
+      &:hover {
+        background-color: darkred;
+      }
+    }
+    &:hover > .header .close {
+      display: flex;
+    }
   }
   .window-icon {
     height: v(16px);
@@ -321,22 +320,9 @@
     gap: v(4px);
     align-items: center;
   }
-  .close {
-    display: none;
-    margin-left: auto;
-    margin-block: v(-6px);
-    padding: v(2px) v(6px);
-    border-radius: 2px;
-    height: fit-content;
-    &:hover {
-      background-color: darkred;
-    }
-  }
-  &:hover .close {
-    display: block;
-  }
   .image-preview {
     object-fit: contain;
     height: v(120px);
+    width: auto;
   }
 }

@@ -14,7 +14,6 @@ const Desktop = ({ children }: DesktopProps) => {
   const wm = useDWM();
 
   const user = store.get$('system.current_user', 'system', 'user') as string;
-  const scale = store.get$('settings.scaling', user as string, 1);
 
   return (
     <div

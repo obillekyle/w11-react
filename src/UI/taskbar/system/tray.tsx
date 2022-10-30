@@ -1,11 +1,11 @@
-import { Icon } from "@iconify/react";
-import Taskbar from "../../taskbar";
+import { Icon } from '@iconify/react';
+import Taskbar from '..';
 
 const SystemTray = () => {
   return (
     <>
       <Taskbar.Button
-        className={"show-hidden-icons"}
+        className={'show-hidden-icons'}
         tooltip="Show hidden icons"
       >
         <Icon icon="fluent:chevron-up-20-filled" height="auto" />

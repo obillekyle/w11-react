@@ -1,7 +1,7 @@
-import { useInterval } from "@mantine/hooks";
-import dayjs from "dayjs";
-import { useState, useEffect } from "react";
-import Taskbar from "../../taskbar";
+import { useInterval } from '@mantine/hooks';
+import dayjs from 'dayjs';
+import { useState, useEffect } from 'react';
+import Taskbar from '..';
 
 const NotificationMenu = () => {
   const [time, setTime] = useState(dayjs());
@@ -15,10 +15,10 @@ const NotificationMenu = () => {
   return (
     <Taskbar.Button
       className="time-date"
-      tooltip={time.format("dddd, MMMM D, YYYY")}
+      tooltip={time.format('dddd, MMMM D, YYYY')}
     >
-      <div>{time.format("h:mm A")}</div>
-      <div>{time.format("M/D/YYYY")}</div>
+      <div>{time.format('h:mm A')}</div>
+      <div>{time.format('M/D/YYYY')}</div>
     </Taskbar.Button>
   );
 };

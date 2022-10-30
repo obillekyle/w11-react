@@ -66,7 +66,14 @@ const PreviewItem = ({ window, id }: PreviewProps) => {
   }, []);
 
   return (
-    <div className={clsx('app-preview', w.focused == id && 'focused')} key={id}>
+    <div
+      key={id}
+      onClick={(e) => {
+        e.preventDefault();
+        wm.focus(id);
+      }}
+      className={clsx('app-preview', w.focused == id && 'focused')}
+    >
       <div className="header">
         <img className="window-icon" src={window.icon} />
         <div className="window-name">{window.name}</div>
@@ -74,7 +81,7 @@ const PreviewItem = ({ window, id }: PreviewProps) => {
           <svg data-src="/assets/window/close.svg" />
         </div>
       </div>
-      <embed src={preview} id={'image' + id} className="image-preview" />
+      <svg data-src={preview} id={'image' + id} className="image-preview" />
     </div>
   );
 };

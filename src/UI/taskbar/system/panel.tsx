@@ -3,8 +3,10 @@ import { Group, Indicator } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
 import _ from 'lodash';
 import { useEffect, useLayoutEffect, useState } from 'react';
-import Taskbar from '../../taskbar';
+import Taskbar from '..';
 import { useStore } from '../../../api/store';
+import UI from '../../application';
+import { v } from '../../../api/util';
 
 const Panel = () => {
   return (
@@ -54,6 +56,8 @@ function getConnectionInfo(): NetworkConnection {
 }
 
 const Internet = () => {
+  const store = useStore();
+  const scaling = store.get$('settings.scaling', 'user', 1);
   const [connection, setConnection] = useState<NetworkConnection>();
   const interval = useInterval(() => setConnection(getConnectionInfo), 1000);
 
@@ -86,8 +90,8 @@ const Internet = () => {
             ? 'fluent:wifi-1-20-regular'
             : 'fluent:globe-prohibited-20-regular'
         }
-        height={38}
-        width={20}
+        height={38 * scaling}
+        width={20 * scaling}
       />
     </Taskbar.Tooltip>
   );
@@ -105,6 +109,9 @@ const getAudioDevices = async () => {
 };
 
 const Volume = () => {
+  const store = useStore();
+  const scaling = store.get$('settings.scaling', 'user', 1);
+
   const [devices, updateDevices] = useState<string[]>([]);
   const interval = useInterval(
     async () => updateDevices(await getAudioDevices()),
@@ -123,7 +130,7 @@ const Volume = () => {
 
   return (
     <Taskbar.Tooltip label={`${defaultDevice}: 69%`}>
-      <Icon icon="ion:volume-medium-outline" height={38} width={20} />
+      <UI.Icon icon="sound-2" size={20 * scaling} />
     </Taskbar.Tooltip>
   );
 };
@@ -241,12 +248,12 @@ const Battery = () => {
         color="transparent"
         styles={{
           indicator: {
-            marginTop: (charging ? 16 : 24) - 2 * scaling,
+            marginTop: ((charging ? 16 : 24) - 2) * scaling,
             marginLeft: 5 * scaling,
           },
         }}
       >
-        <Icon icon={icon} height={38} width={20} />
+        <Icon icon={icon} height={38 * scaling} width={20 * scaling} />
       </Indicator>
     </Taskbar.Tooltip>
   );
