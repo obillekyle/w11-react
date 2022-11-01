@@ -1,15 +1,15 @@
-import { useStore } from '#api/store';
-import { v } from '#api/util';
+import { v } from './../../../api/util';
 import {
   SelectProps,
   Select as S,
   TextInput as T,
   TextInputProps,
 } from '@mantine/core';
+import { useSettings } from '../../../os';
 
 export const Select = (props: SelectProps) => {
-  const store = useStore();
-  const timing = store.get$('settings.timing', 'user', 1);
+  const store = useSettings();
+  const timing = store.get('timing', 1);
 
   return (
     <S
@@ -104,6 +104,9 @@ export const Input = (props: TextInputProps) => {
           borderRadius: v(4),
           background: '#80808060',
           fontSize: v(13),
+          '&::placeholder': {
+            color: 'whitesmoke',
+          },
         },
       })}
     />

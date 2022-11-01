@@ -1,17 +1,20 @@
 import { clsx } from '@mantine/core';
 import { useToggle } from '@mantine/hooks';
-import { get } from 'get-wild';
 import _ from 'lodash';
 import { uniqueId } from 'lodash';
 import {
   createContext,
-  DragEvent,
   MouseEvent,
   PointerEvent,
   ReactNode,
   useContext,
+  useEffect,
+  useMemo,
+  useRef,
   useState,
 } from 'react';
+import { useSettings } from '../os';
+import UI from './application';
 import './window.scss';
 
 export type AppProps = {
@@ -22,18 +25,21 @@ export type AppProps = {
   onlyOne?: boolean;
   exec?: string;
   initialOptions?: {
+    position?: {
+      x?: 'center' | number;
+      y?: 'center' | number;
+    };
     header?: {
       height?: number;
       scale?: number;
     };
-    show?: {
+    hide?: {
       icon?: boolean;
       name?: boolean;
       window?: boolean;
     };
     custom?: {
-      icon?: string;
-      name?: string;
+      header?: ReactNode;
     };
   };
   window?: {
@@ -96,14 +102,18 @@ const default_windows: DefaultWindow = {
 const default_app: AppType = () => {
   return {
     focus: () => {},
-    close: () => {},
+    close: () => false,
     state: {
       hidden: false,
       maximized: false,
       minimized: false,
       value: [],
     },
-  } as any;
+    window: {
+      icon: '',
+      title: '',
+    },
+  };
 };
 
 type ReactState<T> = [T, (arg: T | ((arg: T) => T)) => void];
@@ -159,6 +169,7 @@ export const WindowManager = ({ children }: any) => {
             size: {
               height: any.window?.height || 400,
               width: any.window?.width || 500,
+              scale: any.window?.scale,
             },
           })
         )! || true
@@ -180,6 +191,7 @@ export const WindowManager = ({ children }: any) => {
               size: {
                 height: any.window?.height || 400,
                 width: any.window?.width || 500,
+                scale: any.window?.scale,
               },
             },
           },
@@ -323,10 +335,51 @@ export const Windows = () => {
 const AppContext = createContext({} as ReturnType<AppType>);
 export const useApplication = () => useContext(AppContext);
 
-const AppWindow = ({ name, icon, children, id, ...props }: AppProps) => {
+const AppWindow = ({
+  name,
+  icon,
+  children,
+  initialOptions: init,
+  id,
+  window,
+  ...props
+}: AppProps) => {
+  const store = useSettings();
+  const scale = store.get('scaling', 1);
+  const ref = useRef<HTMLDivElement>(null);
+
   const wm = useDWM();
   const [w] = wm.window;
   const app = wm.app(id);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const element = ref.current;
+    const pos = init?.position;
+
+    const cx = innerWidth / 2 - (window?.width ?? 400) / 2;
+    const cy = innerHeight / 2 - (window?.height ?? 400) / 2;
+    const top = (typeof pos?.y == 'number' ? pos.y : cy) + 'px';
+    const left = (typeof pos?.x == 'number' ? pos.x : cx) + 'px';
+
+    element.style.top = top;
+    element.style.left = left;
+    element.style.setProperty('--y', top);
+    element.style.setProperty('--x', left);
+  }, [ref]);
+
+  let style = useMemo(
+    () =>
+      ({
+        '--header-height': (init?.header?.height ?? 30) + 'px',
+        '--window-min-width': (window?.width ?? 400) + 'px',
+        '--window-min-height': (window?.height ?? 300) + 'px',
+        '--window-scaling': (window?.scale ?? scale) + '',
+        width: (window?.width ?? 400) + 'px',
+        height: (window?.height ?? 300) + 'px',
+      } as any),
+    [scale]
+  );
 
   return (
     <AppContext.Provider value={app}>
@@ -342,53 +395,56 @@ const AppWindow = ({ name, icon, children, id, ...props }: AppProps) => {
         )}
         data-uid={id}
         onMouseDown={() => wm.focus(id)}
-        style={
-          {
-            '--header-height': `${
-              props.initialOptions?.header?.height ?? 30
-            }px`,
-          } as any
-        }
+        style={style}
+        ref={ref}
       >
         <div
           className="app-header"
           onMouseDown={(e) => dragMouseDown(e, id, app)}
         >
-          <img className="app-icon" src={icon} width="16px" height="16px" />
-          <div className="app-name">{name}</div>
+          {init?.hide?.icon || <img className="app-icon" src={icon} />}
+          {init?.hide?.name || <div className="app-name">{name}</div>}
+          {init?.custom?.header}
           <div className="actions">
             <div className="minimize">
-              <svg data-src="/assets/window/minimize-task.svg" />
+              <UI.Icon icon="minimize-task" />
             </div>
             <div
               className="expand"
               onClick={() => (app.state.maximized = !app.state.maximized)}
             >
-              <svg data-src="/assets/window/maximize-window.svg" />
+              <UI.Icon
+                icon={
+                  app.state.maximized ? 'minimize-window' : 'maximize-window'
+                }
+              />
             </div>
             <div className="close" onClick={() => wm.close(id)}>
-              <svg data-src="/assets/window/close.svg" />
+              <UI.Icon icon="close" />
             </div>
           </div>
         </div>
         <div className="app-frame w11-scroll">{children}</div>
-
-        {!app.state.maximized && (
-          <>
-            <div className="resize resize-n" onPointerDown={resize} />
-            <div className="resize resize-s" onPointerDown={resize} />
-            <div className="resize resize-e" onPointerDown={resize} />
-            <div className="resize resize-w" onPointerDown={resize} />
-            <div className="resize resize-nw" onPointerDown={resize} />
-            <div className="resize resize-ne" onPointerDown={resize} />
-            <div className="resize resize-sw" onPointerDown={resize} />
-            <div className="resize resize-se" onPointerDown={resize} />
-          </>
-        )}
+        {!app.state.maximized && <Resize />}
       </div>
     </AppContext.Provider>
   );
 };
+
+function Resize() {
+  return (
+    <>
+      <div className="resize resize-n" onPointerDown={resize} />
+      <div className="resize resize-s" onPointerDown={resize} />
+      <div className="resize resize-e" onPointerDown={resize} />
+      <div className="resize resize-w" onPointerDown={resize} />
+      <div className="resize resize-nw" onPointerDown={resize} />
+      <div className="resize resize-ne" onPointerDown={resize} />
+      <div className="resize resize-sw" onPointerDown={resize} />
+      <div className="resize resize-se" onPointerDown={resize} />
+    </>
+  );
+}
 
 function resize(event: PointerEvent<HTMLDivElement>) {
   event.preventDefault();
@@ -473,11 +529,6 @@ function resizing(
   setPos(target);
 }
 
-let pos1 = 0,
-  pos2 = 0,
-  pos3 = 0,
-  pos4 = 0;
-
 function dragMouseDown(
   e: MouseEvent<HTMLDivElement>,
   uid: string,
@@ -487,13 +538,13 @@ function dragMouseDown(
 
   if (!(e.target as HTMLElement).classList.contains('app-header')) return;
 
-  pos3 = e.clientX;
-  pos4 = e.clientY;
   document.body.style.cursor = 'move';
-
   const target = document.querySelector(
     `[data-uid="${uid}"]`
   ) as HTMLDivElement;
+
+  target.dataset.x = e.clientX + '';
+  target.dataset.y = e.clientY + '';
 
   document.onmouseup = () => {
     const rect = target.getBoundingClientRect();
@@ -516,10 +567,10 @@ function dragMouseDown(
 
 function elementDrag(e: any, target: HTMLDivElement, app: ReturnType<AppType>) {
   e = e || window.event;
-  pos1 = pos3 - e.clientX;
-  pos2 = pos4 - e.clientY;
-  pos3 = e.clientX;
-  pos4 = e.clientY;
+  const newX = Number(target.dataset.x) - e.clientX;
+  const newY = Number(target.dataset.y) - e.clientY;
+  target.dataset.x = e.clientX + '';
+  target.dataset.y = e.clientY + '';
 
   if (target.classList.contains('maximized')) {
     const style = getComputedStyle(target);
@@ -531,8 +582,8 @@ function elementDrag(e: any, target: HTMLDivElement, app: ReturnType<AppType>) {
     return;
   }
 
-  target.style.top = target.offsetTop - pos2 + 'px';
-  target.style.left = target.offsetLeft - pos1 + 'px';
+  target.style.top = target.offsetTop - newY + 'px';
+  target.style.left = target.offsetLeft - newX + 'px';
   setPos(target);
 }
 

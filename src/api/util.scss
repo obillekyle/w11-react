@@ -7,6 +7,8 @@
 }
 
 @mixin transparent($pos: center, $x: null, $y: null, $o: 0.9, $i: 100px) {
+  position: relative;
+
   &::before,
   &::after {
     position: absolute;

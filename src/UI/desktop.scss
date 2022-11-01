@@ -1,7 +1,8 @@
-@import "../api/util";
+@import '../api/util';
 
 .desktop-main {
-  background: var(--wp, url("/assets/Web/4k/Wallpapers/default.jpg"));
+  background-color: black;
+  background-image: var(--wp, url('/assets/Web/4k/Wallpapers/default.jpg'));
   width: 100vw;
   height: 100vh;
   padding-bottom: v(48px);
@@ -19,5 +20,5 @@
   padding-left: v(4px);
   font-weight: 300;
   font-size: v(12px);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }

@@ -6,7 +6,7 @@
   position: absolute;
   background: rgb(49, 49, 49);
   box-shadow: 0 0 0 1px inset #80808036;
-  inset: calc(0px + v(var(--header-height, 20px))) 0 0 0;
+  inset: calc(0px + v(var(--header-height, 30px))) 0 0 0;
 }
 
 .app-ui-tabs {
@@ -32,13 +32,13 @@
   }
   &-content {
     height: calc(
-      100% - (v(24px) + (var(--toolbar, 0) * v(24px)) + v(--header-height))
+      100% -
+        ((var(--tabs, 0) * v(24px)) + (var(--toolbar, 0) * v(24px)) - v(4px))
     );
   }
 }
 
 .app-ui-toolbar {
-  --toolbar: 1;
   display: flex;
   user-select: none;
   margin-top: v(-6px);

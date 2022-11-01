@@ -1,12 +1,11 @@
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
-import { useStore } from '#api/store';
-import ProgressRing from '#ui/progress';
-import { useApplication, useDWM } from '#ui/window';
-import UI from '#ui/application';
+import ProgressRing from '../../ui/progress';
+import { useApplication, useDWM } from '../../ui/window';
+import UI from '../../ui/application';
 import './index.scss';
 import test2 from './test';
-import { useMantineTheme } from '@mantine/core';
+import { useSettings } from '../../os';
 
 const test = {
   id: 'com.test',
@@ -16,18 +15,18 @@ const test = {
 };
 
 function App() {
-  const store = useStore();
-  const scale = store.get$('settings.scaling', 'user', 1);
-  const timing = store.get$('settings.timing', 'user', 1);
+  const store = useSettings();
+  const scale = store.get('scaling', 1);
+  const timing = store.get('timing', 1);
   const application = useApplication();
   const wm = useDWM();
 
   const [ring, setRing] = useState<[number, number]>([48, 6]);
 
-  const setScale = (s: number) => store.set$('settings.scaling', s, 'user');
-  const setTiming = (t: number) => store.set$('settings.timing', t, 'user');
+  const setScale = (s: number) => store.set('scaling', s);
+  const setTiming = (t: number) => store.set('timing', t);
 
-  const wallpaper = store.get$('settings.wallpaper', 'user');
+  const wallpaper = store.get('wallpaper');
 
   return (
     <div className="test-frame">
@@ -108,6 +107,37 @@ function App() {
                 data={['32', '48', '64', '96']}
                 value={ring[0] + ''}
                 onChange={(v) => setRing((r) => [parseInt(v!), r[1]])}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="list-item">
+          <Icon icon="fluent:arrow-autofit-width-24-regular" className="icon" />
+          <div className="heading">
+            <div className="title">Change Wallpaper</div>
+            <div className="sub">The size of the progress ring</div>
+          </div>
+          <div className="right">
+            <div className="right">
+              <UI.Select
+                data={[
+                  {
+                    label: 'Windows 11 Dark',
+                    value: '/assets/Web/4k/Wallpapers/default.jpg',
+                  },
+                  {
+                    label: 'Unsplash Image',
+                    value: '/assets/wp.jpg',
+                  },
+                  {
+                    label: 'Unsplash Image #2',
+                    value: '/assets/wp3.jpg',
+                  },
+                ]}
+                value={store.get('wallpaper')?.url}
+                onChange={(v) =>
+                  store.set('wallpaper', (d) => ({ ...d, url: v ?? d.url }))
+                }
               />
             </div>
           </div>

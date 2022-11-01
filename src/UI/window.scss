@@ -1,27 +1,33 @@
 @import '../api/util';
 
 .app-window {
-  --header-height: 30px;
-  font-size: v(12px);
   position: absolute;
-  min-width: v(400px);
-  min-height: v(300px);
+  --header-height: 30px;
   max-width: 100%;
-  max-height: calc(100% - v(var(--taskbar-height, 48px)));
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-height: calc(100% - v(var(--taskbar-height, 47px)));
+  min-width: v(var(--window-min-width, 400px));
+  min-height: v(var(--window-min-height, 300px));
+  aspect-ratio: var(--window-aspect-ratio, auto);
   border-radius: v(8px);
-  border: v(0.5px) solid rgb(128, 128, 128, 0.4);
+  box-shadow: 0 0 0 0.5px rgb(128, 128, 128, 0.8), 0 8px 24px black;
   background: #212121;
   overflow: hidden;
   animation: opening forwards 0.1s;
-  will-change: inset;
   isolation: isolate;
 
   @include wp-transparent(center, var(--x, 0px), var(--y, 0px));
 
+  .app-header,
+  .app-frame {
+    --scaling: var(--window-scaling, 1);
+    font-size: v(12px);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
   .app-header {
     height: v(var(--header-height, 30px));
     display: flex;
+    max-width: 100%;
     gap: v(4px);
     opacity: 0.7;
     user-select: none;
@@ -32,6 +38,13 @@
     width: v(16px);
     height: v(16px);
     margin-left: v(8px);
+    pointer-events: none;
+  }
+
+  .app-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
   }
 
   .actions {
@@ -78,13 +91,14 @@
       100% {
         opacity: 1;
         inset: 0 0 0 0;
-        height: calc(100% - v(var(--taskbar-height, 48px)));
+        height: calc(100% - v(var(--taskbar-height, 47px)));
         width: 100%;
       }
     }
   }
 
   .app-frame {
+    --scaling: var(--window-scaling, 1);
     width: 100%;
     height: calc(100% - v(var(--header-height, 30px)));
     overflow-y: auto;
@@ -110,8 +124,8 @@
   &.resize-ne,
   &.resize-sw,
   &.resize-se {
-    width: 8px;
-    height: 8px;
+    width: v(8px);
+    height: v(8px);
   }
 
   &.resize-n,
@@ -128,7 +142,7 @@
 
   &.resize-n,
   &.resize-s {
-    height: 2px;
+    height: v(2px);
     left: 8px;
     right: 8px;
     cursor: ns-resize;
@@ -136,7 +150,7 @@
 
   &.resize-e,
   &.resize-w {
-    width: 2px;
+    width: v(2px);
     top: 8px;
     bottom: 8px;
     cursor: ew-resize;

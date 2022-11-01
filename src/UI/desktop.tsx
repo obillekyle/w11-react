@@ -1,19 +1,17 @@
-import { Box, Button, RingProgress, Slider } from '@mantine/core';
-import { ReactNode, useContext } from 'react';
-import { useStore } from '../api/store';
+import { ReactNode } from 'react';
+import { useSystem } from '../os';
 import './desktop.scss';
-import ProgressRing from './progress';
-import AppWindow, { useDWM, Windows } from './window';
+import { useDWM, Windows } from './window';
 
 type DesktopProps = {
   children?: ReactNode;
 };
 
 const Desktop = ({ children }: DesktopProps) => {
-  const store = useStore();
+  const system = useSystem();
   const wm = useDWM();
 
-  const user = store.get$('system.current_user', 'system', 'user') as string;
+  const user = system.get('current_user', 'user') as string;
 
   return (
     <div
@@ -22,7 +20,7 @@ const Desktop = ({ children }: DesktopProps) => {
     >
       <Windows />
       {children}
-      <WinVer ver="10502.rs_prerelease.221015-1010" />
+      <WinVer ver="10607.rs_prerelease.221101-1001" />
     </div>
   );
 };

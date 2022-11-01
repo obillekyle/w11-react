@@ -4,9 +4,9 @@ import { useInterval } from '@mantine/hooks';
 import _ from 'lodash';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import Taskbar from '..';
-import { useStore } from '../../../api/store';
 import UI from '../../application';
 import { v } from '../../../api/util';
+import { useSettings } from '../../../os';
 
 const Panel = () => {
   return (
@@ -56,8 +56,8 @@ function getConnectionInfo(): NetworkConnection {
 }
 
 const Internet = () => {
-  const store = useStore();
-  const scaling = store.get$('settings.scaling', 'user', 1);
+  const store = useSettings();
+  const scaling = store.get('scaling', 1);
   const [connection, setConnection] = useState<NetworkConnection>();
   const interval = useInterval(() => setConnection(getConnectionInfo), 1000);
 
@@ -109,8 +109,8 @@ const getAudioDevices = async () => {
 };
 
 const Volume = () => {
-  const store = useStore();
-  const scaling = store.get$('settings.scaling', 'user', 1);
+  const store = useSettings();
+  const scaling = store.get('scaling', 1);
 
   const [devices, updateDevices] = useState<string[]>([]);
   const interval = useInterval(
@@ -129,7 +129,7 @@ const Volume = () => {
     ?.replace('Default - ', '');
 
   return (
-    <Taskbar.Tooltip label={`${defaultDevice}: 69%`}>
+    <Taskbar.Tooltip label={`${defaultDevice ?? 'Browser Speakers'}: 69%`}>
       <UI.Icon icon="sound-2" size={20 * scaling} />
     </Taskbar.Tooltip>
   );
@@ -193,8 +193,8 @@ const bi: Record<string, string> = {
 };
 
 const Battery = () => {
-  const store = useStore();
-  const scaling = store.get$('settings.scaling', 'user', 1);
+  const store = useSettings();
+  const scaling = store.get('scaling', 1);
   const [battery, setBattery] = useState<BatteryProps | undefined>();
   const interval = useInterval(
     async () => setBattery(await getBattery()),

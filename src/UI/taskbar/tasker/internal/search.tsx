@@ -1,11 +1,14 @@
-import Taskbar from "../..";
+import UI from '../../../../ui/application';
+import { Icon } from '@iconify/react';
+import Taskbar from '../..';
+import './search.scss';
 
 const SearchButton = () => {
   return (
     <Taskbar.Popover
       hover
       position="top"
-      transition={"slide-up"}
+      transition={'slide-up'}
       transitionDuration={200}
       zIndex={5}
       withinPortal={true}
@@ -18,7 +21,14 @@ const SearchButton = () => {
         </Taskbar.Button>
       }
     >
-      <div>Test</div>
+      <div className="search-container">
+        <UI.Input
+          icon={<Icon icon="fluent:search-24-filled" height={20} />}
+          placeholder="Type here to search"
+          width={256}
+          height={40}
+        />
+      </div>
     </Taskbar.Popover>
   );
 };

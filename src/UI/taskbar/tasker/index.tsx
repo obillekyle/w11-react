@@ -1,18 +1,12 @@
 import _, { add } from 'lodash';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
-import { useStore } from '../../../api/store';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDWM } from '../../window';
 import SearchButton from './internal/search';
 import StartButton from './internal/start';
 import TaskView from './internal/taskview';
 import Widget from './shared/widget';
 import Preview from './shared/preview';
+import { useSettings } from '../../../os';
 
 type PinProps = {
   id: string;
@@ -23,11 +17,12 @@ type PinProps = {
 
 const Tasker = () => {
   const wm = useDWM();
-  const store = useStore();
-  const [ap, setAp] = useState<PinProps[]>([]);
   const [w] = wm.window;
+  const store = useSettings();
+  const [ap, setAp] = useState<PinProps[]>([]);
+
   const pinned = useMemo(
-    () => store.get$('taskbar.pinned', 'user', ['test', 'chrome']),
+    () => store.get('pinned', ['test', 'chrome']),
     [store]
   );
 

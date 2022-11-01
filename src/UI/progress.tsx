@@ -1,7 +1,7 @@
 import { RingProgress } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
-import { useStore } from '../api/store';
+import { useSettings } from '../os';
 import { v } from '../api/util';
 import './progress.scss';
 
@@ -11,10 +11,10 @@ const ProgressRing = ({
   size = 64,
   reducedShaking = false,
 }) => {
-  const store = useStore();
+  const store = useSettings();
   const [width, setWidth] = useState<[number, boolean]>([1, true]);
-  const scale = store.get$('settings.scaling', 'user', 1);
-  const timed = store.get$('settings.timing', 'user', 1) * speed;
+  const scale = store.get('scaling', 1);
+  const timed = store.get('timing', 1) * speed;
 
   const interval = useInterval(() => {
     setWidth((w) => {

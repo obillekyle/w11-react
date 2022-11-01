@@ -7,11 +7,11 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { forwardRef, HTMLAttributes, ReactNode, useState } from 'react';
-import { useStore } from '#api/store';
 import SystemTaskbar from './system';
 import Widget from './widget';
 import Tasker from './tasker';
 import './index.scss';
+import { useSettings } from '../../os';
 
 type TaskbarButton = {
   active?: boolean;
@@ -43,9 +43,9 @@ type TaskbarTooltip = {
 };
 
 const Tp = ({ label, children }: TaskbarTooltip) => {
-  const store = useStore();
-  const scale = store.get$('settings.scaling', 'system', 1);
-  const timed = store.get$('settings.timing', 'system', 1);
+  const store = useSettings();
+  const scale = store.get('scaling', 1);
+  const timed = store.get('timing', 1);
 
   return (
     <Tooltip
@@ -126,8 +126,8 @@ const Po = ({
 };
 
 const Taskbar = () => {
-  const store = useStore();
-  const timed = store.get$('settings.scaling', 'system', 1);
+  const store = useSettings();
+  const timed = store.get('scaling', 1);
 
   return (
     <Tooltip.Group closeDelay={300 / timed} openDelay={1200 / timed}>

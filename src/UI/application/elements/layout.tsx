@@ -1,8 +1,16 @@
 import { Icon } from '@iconify/react';
 import { Popover, Tooltip } from '@mantine/core';
 import { useClickOutside } from '@mantine/hooks';
-import { HTMLAttributes, MouseEvent, ReactNode, useState } from 'react';
-import { cx } from '#api/util';
+import {
+  HTMLAttributes,
+  MouseEvent,
+  ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import { cx } from '../../../api/util';
 import _ from 'lodash';
 
 export const Container = ({
@@ -48,9 +56,20 @@ export const Toolbar = ({ options }: ToolbarProps) => {
   const [f, sF] = useState(false);
   const [h, sH] = useState('');
   const ref = useClickOutside(() => sF(false));
+  const ref2 = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!ref2.current) return;
+    const element = ref2.current.parentElement;
+    element?.style.setProperty('--toolbar', '1');
+    return () => {
+      if (!element) return;
+      element.style.removeProperty('--toolbar');
+    };
+  }, [ref]);
 
   return (
-    <div className="app-ui-toolbar" onClick={() => sF((t) => !t)}>
+    <div className="app-ui-toolbar" onClick={() => sF((t) => !t)} ref={ref2}>
       <Tooltip.Group>
         {_.map(options, (object, key) => {
           if (!object.show) return null;
@@ -61,9 +80,10 @@ export const Toolbar = ({ options }: ToolbarProps) => {
               withinPortal
               position="bottom-start"
               offset={0}
+              key={key}
               opened={focus && f}
             >
-              <Popover.Target key={key}>
+              <Popover.Target>
                 <div
                   ref={ref}
                   onMouseEnter={() => !focus && sH(key)}
@@ -134,10 +154,21 @@ type TabsProps = {
 
 export const Tabs = ({ tabs, initial = 0 }: TabsProps) => {
   const [state, setState] = useState(tabs.length >= initial ? initial : 0);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    const element = ref.current.parentElement;
+    element?.style.setProperty('--tabs', '1');
+    return () => {
+      if (!element) return;
+      element.style.removeProperty('--tabs');
+    };
+  }, [ref]);
 
   return (
     <>
-      <div className="app-ui-tabs">
+      <div className="app-ui-tabs" ref={ref}>
         {tabs.map((t, i) => (
           <div
             key={i}

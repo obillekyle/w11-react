@@ -1,3 +1,4 @@
+import UI from '../../../../ui/application';
 import { clsx } from '@mantine/core';
 import { elementToSVG } from 'dom-to-svg';
 import _ from 'lodash';
@@ -78,7 +79,7 @@ const PreviewItem = ({ window, id }: PreviewProps) => {
         <img className="window-icon" src={window.icon} />
         <div className="window-name">{window.name}</div>
         <div className="close" onClick={() => app.close()}>
-          <svg data-src="/assets/window/close.svg" />
+          <UI.Icon icon="close" size={10} />
         </div>
       </div>
       <svg data-src={preview} id={'image' + id} className="image-preview" />

@@ -1,7 +1,5 @@
-import { Container, Input, Tabs, Toolbar } from '#ui/application';
-import { useApplication } from '#ui/window';
-import { useLocalStorage } from '@mantine/hooks';
-import superjson from 'superjson';
+import { Container, Tabs, Toolbar } from '../../ui/application';
+import { useApplication } from '../../ui/window';
 
 const test2 = {
   id: 'com.test',
@@ -35,64 +33,7 @@ function App() {
             { label: 'Home', element: <div> hi</div> },
             {
               label: 'Tab 2',
-              element: (
-                <div>
-                  Tab 2 yay
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                </div>
-              ),
+              element: <div>Tab 2 yay</div>,
             },
           ]}
         />
