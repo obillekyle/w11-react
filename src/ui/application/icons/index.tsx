@@ -16,10 +16,10 @@ export const Icon = forwardRef<SVGSVGElement, IconProps>(
       <svg
         ref={ref}
         {...props}
-        data-src={`/assets/icons/${icon ?? 'f'}.svg`}
+        data-src={`/assets/icons/${icon ?? 'close'}.svg`}
         color={color}
-        width={size}
-        height={size}
+        width={size == 'auto' ? undefined : size}
+        height={size == 'auto' ? undefined : size}
         style={{ ...style, fontSize }}
       />
     );

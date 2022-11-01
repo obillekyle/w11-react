@@ -10,26 +10,16 @@ import OperatingSystem from './os';
 import { useEffect, useRef } from 'react';
 
 function Computer() {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    ref.current.requestPointerLock();
-  }, [ref]);
-
   return (
-    <div ref={ref}>
-      <MantineProvider>
-        <BootManager>
-          <OperatingSystem>
-            <WindowManager>
-              <App />
-            </WindowManager>
-          </OperatingSystem>
-        </BootManager>
-      </MantineProvider>
-    </div>
+    <MantineProvider>
+      <BootManager>
+        <OperatingSystem>
+          <WindowManager>
+            <App />
+          </WindowManager>
+        </OperatingSystem>
+      </BootManager>
+    </MantineProvider>
   );
 }
 

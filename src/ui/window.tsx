@@ -127,9 +127,9 @@ type WindowContext = {
 
 const Window = createContext<WindowContext>({
   window: [default_windows, (arg) => {}],
-  open: (any, exec) => false,
-  close: (wid) => false,
-  focus: (wid) => false,
+  open: () => false,
+  close: () => false,
+  focus: () => false,
   app: default_app,
 });
 
