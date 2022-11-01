@@ -1,14 +1,18 @@
 import { Icon } from '@iconify/react';
-import Taskbar from '..';
+import Taskbar from '@ui/taskbar';
+import { useSettings } from '../../../os';
 
 const SystemTray = () => {
+  const settings = useSettings();
+  const scaling = settings.get('scaling', 1);
+
   return (
     <>
       <Taskbar.Button
         className={'show-hidden-icons'}
         tooltip="Show hidden icons"
       >
-        <Icon icon="fluent:chevron-up-20-filled" height="auto" />
+        <Icon icon="fluent:chevron-up-20-filled" height={20 * scaling} />
       </Taskbar.Button>
       <Taskbar.Button
         className="kb-layout"
