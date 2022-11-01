@@ -1,4 +1,4 @@
-import { AppProps } from '../.././ui/window';
+import { AppProps } from '@ui/window';
 
 const chrome: AppProps = {
   onlyOne: true,

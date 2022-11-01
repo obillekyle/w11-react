@@ -2,7 +2,7 @@ import { RingProgress } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
 import { useSettings } from '../os';
-import { v } from '../api/util';
+import { v } from '@api/util';
 import './progress.scss';
 
 const ProgressRing = ({

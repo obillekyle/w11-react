@@ -2,10 +2,9 @@ import { Icon } from '@iconify/react';
 import { Group, Indicator } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
 import _ from 'lodash';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import Taskbar from '..';
-import UI from '../../application';
-import { v } from '../../../api/util';
+import UI from '@ui/application';
 import { useSettings } from '../../../os';
 
 const Panel = () => {

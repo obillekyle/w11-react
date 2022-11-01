@@ -1,8 +1,8 @@
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
-import ProgressRing from '../../ui/progress';
-import { useApplication, useDWM } from '../../ui/window';
-import UI from '../../ui/application';
+import ProgressRing from '@ui/progress';
+import { useApplication, useDWM } from '@ui/window';
+import UI from '@ui/application';
 import './index.scss';
 import test2 from './test';
 import { useSettings } from '../../os';

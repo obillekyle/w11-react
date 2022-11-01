@@ -1,5 +1,4 @@
-@import '../../api/util';
-
+@import '@api/util';
 
 .taskbar-main {
   @include transparent('center', 100%, 0, 0.6);

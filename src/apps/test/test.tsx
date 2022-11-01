@@ -1,5 +1,5 @@
-import { Container, Tabs, Toolbar } from '../../ui/application';
-import { useApplication } from '../../ui/window';
+import { Container, Tabs, Toolbar } from '@ui/application';
+import { useApplication } from '@ui/window';
 
 const test2 = {
   id: 'com.test',

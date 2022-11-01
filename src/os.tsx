@@ -1,8 +1,8 @@
-import useIDB, { IDBFunc } from './api/idb';
+import useIDB, { IDBFunc } from '@api/idb';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import Image from 'image-js';
 import { addListener, launch, stop } from 'devtools-detector';
-import CrashHandler from './ui/crash';
+import CrashHandler from '@ui/crash';
 const default_func = {
   get: (key: string, d?: any) => d,
   set: (key: string, v: any) => {},

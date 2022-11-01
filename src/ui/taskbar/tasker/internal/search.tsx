@@ -1,4 +1,4 @@
-import UI from '../../../../ui/application';
+import UI from '@ui/application';
 import { Icon } from '@iconify/react';
 import Taskbar from '../..';
 import './search.scss';

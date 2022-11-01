@@ -17,5 +17,10 @@ export default defineConfig({
   build: {
     outDir: './build',
   },
-  esbuild: {},
+  resolve: {
+    alias: {
+      '@api': path.resolve(__dirname, './src/api'),
+      '@ui': path.resolve(__dirname, './src/ui'),
+    },
+  },
 });

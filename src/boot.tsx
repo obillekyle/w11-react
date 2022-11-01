@@ -1,4 +1,4 @@
-import ProgressRing from './ui/progress';
+import ProgressRing from '@ui/progress';
 import { useEffect, useState } from 'react';
 
 const BootManager = ({ children }: any) => {

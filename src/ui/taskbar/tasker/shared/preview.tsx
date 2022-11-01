@@ -1,4 +1,4 @@
-import UI from '../../../../ui/application';
+import UI from '@ui/application';
 import { clsx } from '@mantine/core';
 import { elementToSVG } from 'dom-to-svg';
 import _ from 'lodash';
