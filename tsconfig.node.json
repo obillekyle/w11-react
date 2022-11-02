@@ -3,7 +3,11 @@
     "composite": true,
     "module": "ESNext",
     "moduleResolution": "Node",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "#api/*": ["./src/api/*"],
+      "#ui/*": ["./src/ui/*"]
+    }
   },
   "include": ["vite.config.ts"]
 }

@@ -6,7 +6,9 @@
   @return calc($var / var(--timing, 1));
 }
 
-@mixin transparent($pos: center, $x: null, $y: null, $o: 0.9, $i: 20px) {
+@mixin transparent($pos: center, $x: null, $y: null, $o: 0.9, $i: 100px) {
+  position: relative;
+
   &::before,
   &::after {
     position: absolute;
@@ -18,7 +20,8 @@
     width: 100vw;
     height: 100vh;
     background: var(--wp);
-    background-size: cover;
+    background-size: var(--wp-size);
+    background-repeat: var(--wp-repeat);
     background-position: $pos;
     z-index: -2;
     @if $x or $y {
@@ -30,6 +33,37 @@
     z-index: -1;
     background-color: rgb(33, 33, 33, $o);
     backdrop-filter: blur($i);
+  }
+  &,
+  .app-frame {
+    background: none !important;
+  }
+}
+
+@mixin wp-transparent($pos: center, $x: null, $y: null, $o: 0.9) {
+  &::before,
+  &::after {
+    position: absolute;
+    content: '';
+    inset: 0 0 0 0;
+  }
+
+  &::before {
+    width: 100vw;
+    height: 100vh;
+    background: var(--wp-cache);
+    background-size: var(--wp-size);
+    background-repeat: var(--wp-repeat);
+    background-position: $pos;
+    z-index: -2;
+    @if $x or $y {
+      top: calc(var(--y, $y) * -1);
+      left: calc(var(--x, $x) * -1);
+    }
+  }
+  &::after {
+    z-index: -1;
+    background-color: rgb(33, 33, 33, $o);
   }
   &,
   .app-frame {

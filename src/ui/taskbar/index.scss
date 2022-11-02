@@ -1,0 +1,327 @@
+@import '@api/util';
+
+.taskbar-main {
+  @include transparent('center', 100%, 0, 0.6);
+  position: fixed;
+  display: flex;
+  z-index: 10;
+  background-color: rgb(
+    var(--taskbar-color, 32, 32, 32),
+    var(--taskbar-opacity, 1)
+  );
+  border-top: v(1px) solid rgb(128, 128, 128, 0.4);
+  height: v(var(--taskbar-height, 48px));
+  width: 100%;
+  bottom: 0;
+
+  .start,
+  .search,
+  .widgets,
+  .task {
+    transform: scale(1);
+    font-size: v(23px);
+    shape-rendering: geometricPrecision;
+    transition: transform t(0.15s) ease-out, stop-color t(0.2s) ease-in-out;
+  }
+
+  .tasker {
+    position: absolute;
+    inset: 0 0 0 var(--taskbar-location, 50%);
+    transform: translateX(-50%);
+    display: flex;
+    width: max-content;
+    justify-content: center;
+    .taskbar-button {
+      padding-inline: v(2px);
+    }
+
+    .start-menu:active {
+      --start-color-1: #0c9dff;
+      --start-color-2: #0c9dff;
+      .start {
+        transform: scale(0.8);
+      }
+    }
+  }
+
+  .search-menu {
+    &.active {
+      --search-color-1: #fafafa;
+      --search-color-2: #008cfd;
+    }
+    &:active .search {
+      transform: scale(0.7);
+    }
+  }
+
+  .tasker-menu {
+    margin-right: v(1px);
+    .top,
+    .bottom {
+      transition: transform t(0.05s) ease-out;
+    }
+    &:active {
+      .top {
+        transform: translate(-5%, 10%);
+      }
+      .bottom {
+        transform: translate(8%, -5%);
+      }
+      .task {
+        transform: scale(0.8);
+      }
+    }
+  }
+}
+
+.widget {
+  display: flex;
+  .widget-menu:active {
+    .widgets {
+      transform: scale(0.7);
+    }
+  }
+}
+
+.system {
+  height: inherit;
+  display: flex;
+  margin-left: auto;
+  .kb-layout {
+    line-height: 1.3;
+    .container {
+      margin-inline: v(2px);
+    }
+  }
+  .time-date {
+    text-align: end;
+    line-height: 1.3;
+    font-weight: 363;
+    letter-spacing: 0.06px;
+    -webkit-font-smoothing: none;
+  }
+  .panels .container {
+    margin-inline: v(-2px);
+    .iconify {
+      width: v(20px) !important;
+    }
+  }
+  .show-hidden-icons .container {
+    margin-inline: v(-1px);
+  }
+  .show-desktop {
+    width: v(12px);
+    height: 100%;
+    display: grid;
+    place-items: center;
+    &:hover div {
+      height: v(16px);
+      width: v(1px);
+      background-color: gray;
+    }
+  }
+}
+
+.popover {
+  height: 100%;
+  display: flex;
+  align-content: center;
+}
+
+.taskbar-button {
+  border: none;
+  background: unset;
+  padding: v(3px) 0 v(5px) 0;
+  font-size: v(12px);
+  font-family: inherit;
+  line-height: 1;
+  position: relative;
+  color: currentColor;
+
+  &:hover {
+    .button {
+      background-color: rgba(128, 128, 128, 0.1);
+      border-top-color: rgba(128, 128, 128, 0.2);
+    }
+  }
+
+  &.pinned,
+  &.app {
+    &:active .container {
+      transform: scale(0.8);
+    }
+
+    .container {
+      transition: transform t(0.15s) ease-out;
+      transform: scale(1);
+    }
+
+    img,
+    svg {
+      font-size: v(24px);
+      width: v(24px);
+      height: v(24px);
+    }
+  }
+
+  &.closing:not(.pinned) {
+    animation: close forwards 0.3s !important;
+  }
+
+  &.pinned {
+    &.app,
+    &.closing,
+    &.app img,
+    &.app svg {
+      animation: none;
+    }
+
+    &::before {
+      content: '';
+      inset: auto 0 v(6px) 50%;
+      height: v(3px);
+      width: v(0px);
+      position: absolute;
+      border-radius: v(8px);
+      background-color: gray;
+      transform: translateX(-50%);
+      transition: width 0.2s ease-in;
+    }
+  }
+
+  &.app {
+    img,
+    svg {
+      animation: flyup forwards 0.2s;
+    }
+    &::before {
+      content: '';
+      inset: auto 0 v(6px) 50%;
+      height: v(3px);
+      width: v(6px);
+      position: absolute;
+      border-radius: v(8px);
+      background-color: gray;
+      transform: translateX(-50%);
+      transition: width 0.2s ease-in;
+    }
+    &.closing::before {
+      width: v(0px);
+    }
+    &.active {
+      .button {
+        border: none;
+        padding-top: v(1px);
+        background-color: rgba(128, 128, 128, 0.1);
+        box-shadow: 0 0 0 v(1px) rgba(128, 128, 128, 0.1) inset;
+      }
+      &:hover .button {
+        background-color: rgba(128, 128, 128, 0.2);
+      }
+      &::before {
+        width: v(16px);
+        background-color: var(--accent, #0c9dff);
+      }
+    }
+  }
+
+  .button {
+    transition: background-color t(0.05s) ease-out;
+    height: 100%;
+    padding-inline: v(8px);
+    padding-bottom: v(3px);
+    display: grid;
+    border-radius: v(5px);
+    align-items: center;
+    border-top: v(1px) solid transparent;
+  }
+}
+
+@keyframes appOpen {
+  0% {
+    margin-inline: v(-24px);
+    transform: scale(0.2);
+    opacity: 0;
+  }
+
+  100% {
+    margin-inline: 0;
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes flyup {
+  0% {
+    transform: translateY(100%);
+    margin-inline: v(-24px);
+  }
+
+  80% {
+    transform: translateY(-10%);
+    margin-inline: v(-2px);
+  }
+
+  100% {
+    transform: translateY(0);
+    margin-inline: v(0px);
+  }
+}
+
+@keyframes close {
+  0% {
+    margin-inline: 0;
+    opacity: 1;
+  }
+  100% {
+    margin-inline: v(-24px);
+    opacity: 0;
+  }
+}
+
+.app-previews {
+  display: flex;
+  border-radius: v(8px);
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  .app-preview {
+    padding: v(8px);
+    background: rgb(
+      var(--taskbar-color, 32, 32, 32),
+      var(--taskbar-opacity, 1)
+    );
+    &.focused {
+      background: rgb(40, 40, 40, calc(var(--taskbar-opacity, 1)));
+    }
+    > .header .close {
+      display: none;
+      margin-left: auto;
+      margin-block: v(-6px);
+      padding: v(2px) v(6px);
+      border-radius: v(2px);
+      align-items: center;
+      height: v(16px);
+      &:hover {
+        background-color: darkred;
+      }
+    }
+    &:hover > .header .close {
+      display: flex;
+    }
+  }
+  .window-icon {
+    height: v(16px);
+  }
+  .header {
+    display: flex;
+    font-size: v(12px);
+    margin-bottom: v(8px);
+    gap: v(4px);
+    align-items: center;
+  }
+  .image-preview {
+    object-fit: contain;
+    height: v(120px);
+    width: auto;
+  }
+}

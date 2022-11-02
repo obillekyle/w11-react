@@ -1,0 +1,10 @@
+@import '@api/util.scss';
+
+.search-container {
+  display: flex;
+  color: white;
+  padding: v(12px);
+  background-color: #21212190;
+  backdrop-filter: blur(100px);
+  border-radius: v(6px);
+}

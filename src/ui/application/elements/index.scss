@@ -1,0 +1,98 @@
+@import '@api/util';
+
+.app-ui-container {
+  border: v(6px) solid #212121;
+  display: block;
+  position: absolute;
+  background: rgb(49, 49, 49);
+  box-shadow: 0 0 0 1px inset #80808036;
+  inset: calc(0px + v(var(--header-height, 30px))) 0 0 0;
+}
+
+.app-ui-tabs {
+  background: #212121;
+  height: v(24px);
+  display: flex;
+  align-items: flex-end;
+}
+
+.app-ui-tab {
+  user-select: none;
+  padding: v(2px) v(12px);
+  width: max-content;
+  background: rgb(34, 34, 34);
+  border: 1px solid #80808036;
+  text-transform: capitalize;
+  margin-right: -1px;
+  height: v(24);
+  &.active {
+    height: v(24px);
+    border-bottom: none;
+    background: rgb(49, 49, 49);
+  }
+  &-content {
+    height: calc(
+      100% -
+        ((var(--tabs, 0) * v(24px)) + (var(--toolbar, 0) * v(24px)) - v(4px))
+    );
+  }
+}
+
+.app-ui-toolbar {
+  display: flex;
+  user-select: none;
+  margin-top: v(-6px);
+  background: rgb(34, 34, 34);
+  height: v(24px);
+  align-items: center;
+  text-transform: capitalize;
+}
+
+.app-ui-toolbar-item {
+  padding: v(2px) v(8px);
+  border-radius: 2px;
+  border: 1px solid transparent;
+  &:hover {
+    border: 1px solid #008cfd;
+    background: #008cfd80;
+  }
+  &.active {
+    padding-top: v(3px);
+    padding-bottom: v(1px);
+    padding-left: v(9px);
+    padding-right: v(7px);
+  }
+}
+
+.app-ui-toolbar-menu {
+  padding: v(2px) v(4px);
+  border-radius: v(6px);
+  border: 1px solid #212121;
+  background: rgb(54, 54, 54);
+  box-shadow: 0 0 v(8px) #0009;
+}
+
+.app-ui-toolbar-menu-item {
+  display: grid;
+  grid-template-areas: 'i l r';
+  height: v(28px);
+  border-radius: v(4px);
+  align-items: center;
+  grid-template-columns: v(48px) 1fr 1fr;
+  &:hover {
+    background: #ccc2;
+  }
+}
+
+.app-ui-toolbar-menu {
+  &-icon {
+    grid-area: 'i';
+  }
+  &-label {
+    grid-area: 'l';
+    margin-right: auto;
+  }
+  &-right {
+    grid-area: 'r';
+  }
+}
