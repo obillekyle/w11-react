@@ -4,12 +4,12 @@ import { elementToSVG } from 'dom-to-svg';
 import _ from 'lodash';
 import { useState, useLayoutEffect } from 'react';
 import Taskbar from '../..';
-import { AppProps, AppWindow, useDWM } from '../../../window';
+import { AppWindow, Process, useDWM } from '../../../window';
 
 type PreviewProps = {
-  app: AppProps;
+  app: Omit<Process, 'windows'>;
   appId: string;
-  pinned: boolean;
+  pinned?: boolean;
 };
 
 const Preview = ({ app, appId, pinned }: PreviewProps) => {
