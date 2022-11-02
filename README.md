@@ -1,8 +1,8 @@
 # w11-react
 
-A *(probably)* bad clone of Windows 11 for the web, created using the ReactJS Framework
+A _(probably)_ bad clone of Windows 11 for the web, created using the ReactJS Framework
 
-## *This project is far from finished*
+## _This project is far from finished_
 
 ## Notice
 

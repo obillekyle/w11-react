@@ -1,4 +1,4 @@
-import _, { add } from 'lodash';
+import _ from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDWM } from '../../window';
 import SearchButton from './internal/search';
@@ -55,11 +55,11 @@ const Tasker = () => {
       <TaskView />
       <Widget />
       {_.map(ap, (app, o) => (
-        <Preview app={app} o={app.id} key={o} p={true} />
+        <Preview app={app} appId={app.id} key={o} pinned={true} />
       ))}
       {_.map(w.opened, (app, o) => {
         if (app.exec in pinned) return null;
-        <Preview app={app} o={o.split('_')[0]} key={o} />;
+        <Preview app={app} appId={o.split('_')[0]} key={o} />;
       })}
     </div>
   );

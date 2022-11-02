@@ -85,14 +85,14 @@
 }
 
 .app-ui-toolbar-menu {
-  &-icon {
+  [data-icon] {
     grid-area: 'i';
   }
-  &-label {
+  [data-label] {
     grid-area: 'l';
     margin-right: auto;
   }
-  &-right {
+  [data-right] {
     grid-area: 'r';
   }
 }

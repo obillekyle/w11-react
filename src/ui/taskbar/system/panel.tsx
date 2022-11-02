@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Icon } from '@iconify/react';
 import { Group, Indicator } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
@@ -21,7 +23,8 @@ const Panel = () => {
 
 type NetworkConnection =
   | {
-      online: false;
+      readonly online: boolean;
+      type: 'unknown';
     }
   | {
       readonly online: true;
@@ -37,16 +40,16 @@ type NetworkConnection =
         | 'none'
         | 'wifi'
         | 'wimax'
-        | 'other'
-        | 'unknown';
+        | 'other';
     };
 
 function getConnectionInfo(): NetworkConnection {
-  const nav = navigator as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nav = window.navigator as any;
   const online = navigator.onLine;
-  const connection = 'connection' in nav ? nav.connection : null;
+  const connection = nav['connection'];
 
-  if (!(online && connection)) return { online: false };
+  if (!connection) return { online, type: 'unknown' };
 
   return {
     ...connection,
@@ -97,11 +100,11 @@ const Internet = () => {
 };
 
 const getAudioDevices = async () => {
-  const nav = navigator as any;
-  const media: (MediaDeviceInfo | InputDeviceInfo)[] =
-    'mediaDevices' in nav
-      ? await nav.mediaDevices.enumerateDevices()
-      : undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nav = window.navigator as any;
+  const media: (MediaDeviceInfo | InputDeviceInfo)[] = nav['mediaDevices']
+    ? await nav.mediaDevices.enumerateDevices()
+    : undefined;
   const audio: MediaDeviceInfo[] = media.filter((m) => m.kind == 'audiooutput');
   const names = audio.map((i) => i.label);
   return names;
@@ -146,7 +149,7 @@ type BatteryProps = {
 // Battery
 
 const getBattery = async (): Promise<BatteryProps | undefined> => {
-  const nav = navigator as any;
+  const nav = window.navigator as any;
   const battery: Omit<BatteryProps, 'icon' | 'indicator'> =
     'getBattery' in nav ? await nav.getBattery() : undefined;
 
@@ -156,9 +159,9 @@ const getBattery = async (): Promise<BatteryProps | undefined> => {
     const icon = keys.find((v) => Number(v) >= level);
     const indicator = () => {
       if (battery.charging) return bi.charging;
-      if (level >= 7) return bi.critical;
-      if (level >= 15) return bi.warning;
-      return bi.warning;
+      if (level <= 7) return bi.critical;
+      if (level <= 15) return bi.warning;
+      return '';
     };
 
     return {
@@ -187,8 +190,8 @@ const bi: Record<string, string> = {
   90: 'fluent:battery-9-20-regular',
   100: 'fluent:battery-10-20-regular',
   charging: 'ic:outline-bolt',
-  warning: 'fluent:warning-16-regular',
-  critical: 'fluent:dismiss-circle-16-regular',
+  warning: 'fluent:warning-16-filled',
+  critical: 'fluent:dismiss-circle-16-filled',
 };
 
 const Battery = () => {
@@ -216,10 +219,12 @@ const Battery = () => {
     if (dischargingTime !== Infinity) return dischargingTime;
     return 0;
   };
-  const overall = time() / 60;
-  const hours = overall / 60;
+  const overall = Math.floor(time() / 60);
+  const hours = Math.floor(overall / 60);
   const minute = overall % 60;
-  const estimated = hours && `${hours} h` + minute && ` ${minute} min`;
+  const estimated = `\n ${hours ? hours + 'h ' : ''} ${
+    minute ? minute + 'min' : ''
+  }`;
 
   return (
     <Taskbar.Tooltip
@@ -249,6 +254,7 @@ const Battery = () => {
           indicator: {
             marginTop: ((charging ? 16 : 24) - 2) * scaling,
             marginLeft: 5 * scaling,
+            color: 'white',
           },
         }}
       >

@@ -4,32 +4,39 @@ import { elementToSVG } from 'dom-to-svg';
 import _ from 'lodash';
 import { useState, useLayoutEffect } from 'react';
 import Taskbar from '../..';
-import { useDWM } from '../../../window';
+import { AppProps, AppWindow, useDWM } from '../../../window';
 
-const Preview = ({ app, o, p }: any) => {
+type PreviewProps = {
+  app: AppProps;
+  appId: string;
+  pinned: boolean;
+};
+
+const Preview = ({ app, appId, pinned }: PreviewProps) => {
   const wm = useDWM();
   const [w] = wm.window;
 
-  const open = w.opened[o];
+  const open = w.opened[appId];
 
   const classNames = [
-    w.focused.split('_').includes(o) && 'active',
-    w.closing.includes(o) && 'closing',
+    w.focused.split('_').includes(appId) && 'active',
+    w.closing.includes(appId) && 'closing',
     _.keys(open?.windows).length && 'app',
-    p && 'pinned',
+    pinned && 'pinned',
   ];
 
   return (
     <Taskbar.Popover
-      key={o}
+      key={appId}
       hover
       target={
         <Taskbar.Button
-          key={o}
+          key={appId}
           tooltip="test"
           className={clsx(classNames)}
           onClick={(e) => {
-            e.currentTarget.classList.contains('app') || wm.open(app.exec);
+            if (e.currentTarget.classList.contains('app')) return;
+            if (app.exec) wm.open(app.exec);
           }}
         >
           <img src={app.icon} />
@@ -38,19 +45,19 @@ const Preview = ({ app, o, p }: any) => {
     >
       <div className="app-previews">
         {_.map(open?.windows ?? {}, (window, w) => (
-          <PreviewItem window={window} id={o + w} key={w} />
+          <PreviewItem window={window} id={appId + w} key={w} />
         ))}
       </div>
     </Taskbar.Popover>
   );
 };
 
-type PreviewProps = {
-  window: any;
+type PreviewItemProps = {
+  window: AppWindow;
   id: string;
 };
 
-const PreviewItem = ({ window, id }: PreviewProps) => {
+const PreviewItem = ({ window, id }: PreviewItemProps) => {
   const wm = useDWM();
   const [w] = wm.window;
   const app = wm.app(id);

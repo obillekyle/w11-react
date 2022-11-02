@@ -1,7 +1,7 @@
-import ShowDesktop from "./corner";
-import NotificationMenu from "./notif";
-import SystemPanel from "./panel";
-import SystemTray from "./tray";
+import ShowDesktop from './corner';
+import NotificationMenu from './notif';
+import SystemPanel from './panel';
+import SystemTray from './tray';
 
 const SystemTaskbar = () => {
   return (

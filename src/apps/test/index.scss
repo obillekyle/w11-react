@@ -18,23 +18,26 @@
       min-height: v(64px);
       padding: v(14px) v(16px);
       border: v(1px) solid #212121;
-      .icon {
+      [data-icon] {
         width: v(24px);
         height: v(24px);
       }
-      .heading {
+      [data-heading] {
         margin-right: auto;
         display: grid;
-        .title {
+        [data-title] {
           font-size: v(13px);
         }
-        .sub {
+        [data-subtitle] {
           color: gainsboro;
         }
       }
-      .right {
+      [data-right] {
         margin-left: auto;
       }
+    }
+    .list-separator {
+      height: v(12px);
     }
   }
 }

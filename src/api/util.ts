@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Executes value if its a function, return otherwise
  *

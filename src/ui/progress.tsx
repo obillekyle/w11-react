@@ -1,16 +1,23 @@
 import { RingProgress } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
-import { useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { useSettings } from '../os';
 import { v } from '@api/util';
 import './progress.scss';
 
+type ProgressRingProps = {
+  speed?: number;
+  thickness?: number;
+  size?: number;
+  reducedShaking?: boolean;
+};
+
 const ProgressRing = ({
+  size = 64,
   speed = 0.75,
   thickness = 8,
-  size = 64,
   reducedShaking = false,
-}) => {
+}: ProgressRingProps) => {
   const store = useSettings();
   const [width, setWidth] = useState<[number, boolean]>([1, true]);
   const scale = store.get('scaling', 1);
@@ -35,7 +42,7 @@ const ProgressRing = ({
       style={
         {
           '--ring-width': v(size),
-        } as any
+        } as CSSProperties
       }
     >
       <RingProgress

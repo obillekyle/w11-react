@@ -1,6 +1,6 @@
-import { Icon } from "@iconify/react";
-import { Menu } from "@mantine/core";
-import Taskbar from "../..";
+import { Icon } from '@iconify/react';
+import { Menu } from '@mantine/core';
+import Taskbar from '../..';
 
 const TaskView = () => {
   return (
@@ -11,7 +11,7 @@ const TaskView = () => {
         </Taskbar.Button>
       </Menu.Target>
       <Menu.Dropdown>
-        <Menu.Item icon={<Icon icon={"fluent:search-24-filled"} />}>
+        <Menu.Item icon={<Icon icon={'fluent:search-24-filled'} />}>
           Hello
         </Menu.Item>
       </Menu.Dropdown>

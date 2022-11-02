@@ -1,7 +1,6 @@
 import {
   clsx,
   HoverCard,
-  Menu,
   Popover,
   PopoverBaseProps,
   Tooltip,
@@ -79,7 +78,6 @@ type TaskbarPopover = {
 
 const Po = ({
   hover,
-  position,
   target,
   children,
   clickOutside,
@@ -140,6 +138,7 @@ const Taskbar = () => {
   );
 };
 
+Btn.displayName = 'Taskbar Button';
 Taskbar.Popover = Po;
 Taskbar.Button = Btn;
 Taskbar.Tooltip = Tp;

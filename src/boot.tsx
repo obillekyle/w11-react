@@ -1,18 +1,17 @@
 import ProgressRing from '@ui/progress';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
-const BootManager = ({ children }: any) => {
+type BootManagerProps = {
+  children: ReactNode;
+};
+const BootManager = ({ children }: BootManagerProps) => {
   const [boot, setBoot] = useState(false);
 
   useEffect(() => {
-    setInterval(() => {
-      setBoot(true);
-    }, 1000);
+    setInterval(() => setBoot(true), 1000);
   }, []);
 
-  if (boot) {
-    return children;
-  }
+  if (boot) return <>{children}</>;
 
   return (
     <div className="boot-splash">
