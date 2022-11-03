@@ -49,37 +49,37 @@ export type AppProps = {
   };
 };
 
-type DefaultWindow = {
+export type Process = {
+  icon: string;
+  name: string;
+  exec: string;
+  windows: Record<string, AppWindow>;
+};
+
+export type AppWindow = {
+  opts: AppProps['initialOptions'];
+  name: string;
+  icon: string;
+  state: ('maximized' | 'minimized' | 'hidden')[];
+  size: {
+    height: number;
+    width: number;
+    scale?: number;
+  };
+  component: ReactNode;
+};
+
+export type DefaultWindow = {
   focused: string;
   attention: string[];
   closing: string[];
-  opened: {
-    [key: string]: {
-      icon: string;
-      name: string;
-      exec: string;
-      windows: {
-        [key: string]: {
-          opts: AppProps['initialOptions'];
-          name: string;
-          icon: string;
-          state: ('maximized' | 'minimized' | 'hidden')[];
-          size: {
-            height: number;
-            width: number;
-            scale?: number;
-          };
-          component: ReactNode;
-        };
-      };
-    };
-  };
+  opened: Record<string, Process>;
 };
 
-type States = ('minimized' | 'maximized' | 'hidden')[];
-type AppType = (wid: string) => {
-  focus: () => void;
-  close: () => boolean;
+export type States = ('minimized' | 'maximized' | 'hidden')[];
+export type AppType = (wid: string) => {
+  focus: (onError?: (error: string) => void) => void;
+  close: (onError?: (error: string) => void) => void;
   readonly state: {
     value: States;
     maximized: boolean;
@@ -92,7 +92,7 @@ type AppType = (wid: string) => {
   };
 };
 
-const default_windows: DefaultWindow = {
+export const default_windows: DefaultWindow = {
   focused: '',
   attention: [],
   opened: {},
@@ -101,7 +101,7 @@ const default_windows: DefaultWindow = {
 
 const default_app: AppType = () => {
   return {
-    focus: () => {},
+    focus: () => void 0,
     close: () => false,
     state: {
       hidden: false,
@@ -119,14 +119,18 @@ const default_app: AppType = () => {
 type ReactState<T> = [T, (arg: T | ((arg: T) => T)) => void];
 type WindowContext = {
   window: ReactState<DefaultWindow>;
-  open: (any: AppProps | string, exec?: string) => boolean;
-  close: (wid: string) => boolean;
-  focus: (wid: string) => boolean;
+  open(
+    executable: AppProps | string,
+    execPath?: string,
+    onError?: (error: string) => void
+  ): void;
+  focus(wid: string, ignore?: boolean, onError?: (error: string) => void): void;
+  close(wid: string, onError?: (error: string) => void): void;
   app: AppType;
 };
 
 const Window = createContext<WindowContext>({
-  window: [default_windows, (arg) => {}],
+  window: [default_windows, () => void ''],
   open: () => false,
   close: () => false,
   focus: () => false,
@@ -134,174 +138,188 @@ const Window = createContext<WindowContext>({
 });
 
 export const useDWM = () => useContext(Window);
-export const WindowManager = ({ children }: any) => {
-  const [, u] = useToggle();
-  const [w, sW] = useState(default_windows);
+export const WindowManager = (props: { children: ReactNode }) => {
+  const [, update] = useToggle();
+  const [windows, setWindows] = useState(default_windows);
 
   type Param = Parameters<ReactState<DefaultWindow>[1]>[0];
-  const setValue = (v: Param, i = false) => sW(v)! || i || u();
-  const focus = (wid: string, ignore = false) => {
-    if (wid == w.focused) return false;
-    return setValue((w) => _.set(w, 'focused', wid), ignore)! || false;
+  const setValue = (value: Param, ignore = false) => {
+    setWindows(value);
+    ignore || update();
   };
 
-  const open = (any: AppProps | string, exec?: string) => {
-    if (typeof any == 'string') {
-      import(`../apps/${any}/index.tsx`)
-        .then((o) => open(o.default, any))
-        .catch((e) => console.error(e));
-      return true;
-    }
-
-    const id = uniqueId('_');
-    const alreadyOpened = _.has(w.opened, [any.id]);
-    if (any.onlyOne && alreadyOpened) return false;
-
-    focus(any.id + id, true);
-    if (alreadyOpened) {
-      return (
-        setValue((w) =>
-          _.set(w, ['opened', any.id, 'windows', id], {
-            component: any.children,
-            opts: any.initialOptions,
-            icon: any.icon || '/assets/Application.svg',
-            name: any.name || 'Application',
-            size: {
-              height: any.window?.height || 400,
-              width: any.window?.width || 500,
-              scale: any.window?.scale,
-            },
-          })
-        )! || true
-      );
-    }
-
-    return (
-      setValue((w) =>
-        _.set(w, ['opened', any.id], {
-          icon: any.icon || '/assets/Application.svg',
-          name: any.name || 'Application',
-          exec: exec,
-          windows: {
-            [id]: {
-              component: any.children,
-              opts: any.initialOptions,
-              icon: any.icon || '/assets/Application.svg',
-              name: any.name || 'Application',
-              size: {
-                height: any.window?.height || 400,
-                width: any.window?.width || 500,
-                scale: any.window?.scale,
-              },
-            },
-          },
-        })
-      )! || true
-    );
-  };
-
-  const close = (wid: string) => {
-    const id = wid.split('_');
-    const key = ['opened', id[0], 'windows'];
-    const onlyOne = _.keys(_.get(w, key)).length == 1;
-
-    const add = (...ids: string[]) => {
-      return (
-        setValue((w) => _.set(w, 'closing', [...w.closing, ...ids]))! || true
-      );
-    };
-
-    const remove = (key: string | string[]) => {
-      const unset = _.unset(w, key);
-      if (!unset) return false;
-      return (
-        setValue(() => {
-          const pull = _.pull(w.closing, wid, id[0]);
-          return { ...w, closing: pull as any };
-        })! || true
-      );
-    };
-
-    if (onlyOne) {
-      if (!_.has(w, ['opened', id[0]])) return false;
-      setTimeout(() => remove(['opened', id[0]]), 300);
-      return add(id[0], wid);
-    }
-
-    if (!_.has(w, [...key, '_' + id[1]])) return false;
-    setTimeout(() => remove([...key, '_' + id[1]]), 300);
-    return add(wid);
-  };
-
-  const app = (wid: string) => ({
-    focus: () => setValue((v) => ({ ...v, focused: wid })),
-    close: () => close(wid),
-    get state() {
-      const id = wid.split('_');
-      const path = ['opened', id[0], 'windows', '_' + id[1], 'state'];
-      const state: States = _.get(w, path, []);
-
-      const sV = (v: boolean, s: string) => {
-        return v ? [...state, s] : state.filter((s) => s != 'maximized');
-      };
-
-      return {
-        get value() {
-          return state;
-        },
-        get maximized() {
-          return this.value.includes('maximized') as boolean;
-        },
-        get hidden() {
-          return this.value.includes('hidden');
-        },
-        get minimized() {
-          return this.value.includes('minimized');
-        },
-
-        set value(v) {
-          setValue((s) => _.setWith(s, path, v));
-        },
-        set maximized(bool) {
-          setValue((v) => _.setWith(v, path, sV(bool, 'maximized')));
-        },
-        set hidden(bool) {
-          setValue((v) => _.setWith(v, path, sV(bool, 'hidden')));
-        },
-        set minimized(bool) {
-          setValue((v) => _.setWith(v, path, sV(bool, 'minimized')));
-        },
-      };
-    },
-    get window() {
-      const id = wid.split('_');
-      const path = ['opened', id[0], 'windows', '_' + id[1]];
-      const object = _.get(w, path);
-
-      return {
-        get title() {
-          return object.name ?? '';
-        },
-        set title(a: string) {
-          if (object.name == a) return;
-          setValue((v) => _.setWith(v, [...path, 'name'], a));
-        },
-        get icon() {
-          return object.icon ?? '';
-        },
-        set icon(a: string) {
-          if (object.icon == a) return;
-          setValue((v) => _.set(v, [...path, 'title'], a));
-        },
-      };
-    },
-  });
-
-  const window: ReactState<DefaultWindow> = [w, sW];
+  const window: ReactState<DefaultWindow> = [windows, setWindows];
 
   return (
-    <Window.Provider value={{ open, window, close, focus, app }}>
-      {children}
+    <Window.Provider
+      value={{
+        window,
+        open(executable, exec, onError) {
+          if (typeof executable == 'string') {
+            import(`../apps/${executable}/index.tsx`)
+              .then((o) => this.open(o.default, executable))
+              .catch((error) => onError?.(error));
+            return true;
+          }
+
+          const id = uniqueId('_');
+          const alreadyOpened = _.has(windows.opened, [executable.id]);
+          if (executable.onlyOne && alreadyOpened) return false;
+
+          this.focus(executable.id + id, true);
+          if (alreadyOpened) {
+            return setValue((windows) =>
+              _.set(windows, ['opened', executable.id, 'windows', id], {
+                component: executable.children,
+                opts: executable.initialOptions,
+                icon: executable.icon || '/assets/Application.svg',
+                name: executable.name || 'Application',
+                size: {
+                  height: executable.window?.height || 400,
+                  width: executable.window?.width || 500,
+                  scale: executable.window?.scale,
+                },
+              })
+            );
+          }
+
+          return setValue((w) =>
+            _.set(w, ['opened', executable.id], {
+              icon: executable.icon || '/assets/Application.svg',
+              name: executable.name || 'Application',
+              exec: exec,
+              windows: {
+                [id]: {
+                  component: executable.children,
+                  opts: executable.initialOptions,
+                  icon: executable.icon || '/assets/Application.svg',
+                  name: executable.name || 'Application',
+                  size: {
+                    height: executable.window?.height || 400,
+                    width: executable.window?.width || 500,
+                    scale: executable.window?.scale,
+                  },
+                },
+              },
+            })
+          );
+        },
+
+        close(windowId: string) {
+          const id = windowId.split('_');
+          const key = ['opened', id[0], 'windows'];
+          const onlyOne = _.keys(_.get(windows, key)).length == 1;
+
+          const add = (...ids: string[]) => {
+            return setValue((current) =>
+              _.set(current, 'closing', [...current.closing, ...ids])
+            );
+          };
+
+          const remove = (key: string | string[]) => {
+            const unset = _.unset(windows, key);
+            if (!unset) return false;
+            return setValue(() => {
+              const pull = _.pull(windows.closing, windowId, id[0]);
+              return { ...windows, closing: pull };
+            });
+          };
+
+          if (onlyOne) {
+            if (!_.has(windows, ['opened', id[0]])) return false;
+            setTimeout(() => remove(['opened', id[0]]), 300);
+            return add(id[0], windowId);
+          }
+
+          if (!_.has(windows, [...key, '_' + id[1]])) return false;
+          setTimeout(() => remove([...key, '_' + id[1]]), 300);
+          return add(windowId);
+        },
+
+        focus(windowId, ignore = false, onError) {
+          if (windowId == windows.focused) return onError?.('Already focused');
+          setValue((w) => _.set(w, 'focused', windowId), ignore);
+          return;
+        },
+
+        app(wid: string) {
+          const [appId, windowId] = wid.split('_');
+          const windowPath = ['opened', appId, 'windows', '_' + windowId];
+
+          return {
+            focus: () => setValue((current) => ({ ...current, focused: wid })),
+            close: () => this.close(wid),
+            get state() {
+              const path = [...windowPath, 'state'];
+              const states: States = _.get(windows, path, []);
+
+              const setStateValue = (state: States[0], newState: boolean) => {
+                const newStates = newState
+                  ? states.includes(state)
+                    ? states
+                    : [...states, state]
+                  : states.filter((oldState) => oldState != state);
+
+                setValue((current) => _.set(current, path, newStates));
+              };
+
+              return {
+                get value() {
+                  return states;
+                },
+                get maximized() {
+                  return this.value.includes('maximized');
+                },
+                get hidden() {
+                  return this.value.includes('hidden');
+                },
+                get minimized() {
+                  return this.value.includes('minimized');
+                },
+
+                set value(current) {
+                  setValue((s) => _.set(s, path, current));
+                },
+                set maximized(bool) {
+                  setStateValue('maximized', bool);
+                },
+                set hidden(bool) {
+                  setStateValue('hidden', bool);
+                },
+                set minimized(bool) {
+                  setStateValue('minimized', bool);
+                },
+              };
+            },
+            get window() {
+              const path = windowPath;
+              const application = _.get(windows, path) as AppWindow;
+
+              return {
+                get title() {
+                  return application.name;
+                },
+                set title(newTitle: string) {
+                  if (application.name == newTitle) return;
+                  setValue((v) => _.set(v, [...path, 'name'], newTitle));
+                },
+
+                get icon() {
+                  return application.icon;
+                },
+                set icon(newIcon: string) {
+                  if (application.icon == newIcon) return;
+                  setValue((current) =>
+                    _.set(current, [...path, 'title'], newIcon)
+                  );
+                },
+              };
+            },
+          };
+        },
+      }}
+    >
+      {props.children}
     </Window.Provider>
   );
 };
@@ -342,7 +360,6 @@ const AppWindow = ({
   initialOptions: init,
   id,
   window,
-  ...props
 }: AppProps) => {
   const store = useSettings();
   const scale = store.get('scaling', 1);
@@ -368,16 +385,15 @@ const AppWindow = ({
     element.style.setProperty('--x', left);
   }, [ref]);
 
-  let style = useMemo(
-    () =>
-      ({
-        '--header-height': (init?.header?.height ?? 30) + 'px',
-        '--window-min-width': (window?.width ?? 400) + 'px',
-        '--window-min-height': (window?.height ?? 300) + 'px',
-        '--window-scaling': (window?.scale ?? scale) + '',
-        width: (window?.width ?? 400) + 'px',
-        height: (window?.height ?? 300) + 'px',
-      } as any),
+  const style = useMemo(
+    () => ({
+      '--header-height': (init?.header?.height ?? 30) + 'px',
+      '--window-min-width': (window?.width ?? 400) + 'px',
+      '--window-min-height': (window?.height ?? 300) + 'px',
+      '--window-scaling': (window?.scale ?? scale) + '',
+      width: (window?.width ?? 400) + 'px',
+      height: (window?.height ?? 300) + 'px',
+    }),
     [scale]
   );
 
@@ -386,7 +402,7 @@ const AppWindow = ({
       <div
         className={clsx(
           id,
-          `app-window`,
+          'app-window',
           w.focused == id && 'focused',
           app.state.minimized && 'minimized',
           app.state.maximized && 'maximized',
@@ -400,7 +416,7 @@ const AppWindow = ({
       >
         <div
           className="app-header"
-          onMouseDown={(e) => dragMouseDown(e, id, app)}
+          onPointerDown={(e) => dragMouseDown(e, id, app)}
         >
           {init?.hide?.icon || <img className="app-icon" src={icon} />}
           {init?.hide?.name || <div className="app-name">{name}</div>}
@@ -446,6 +462,17 @@ function Resize() {
   );
 }
 
+/**
+ * Temporary, will be replaced with requestAnimationFrame in the future
+ */
+let update = true;
+const ready = () => {
+  if (!update) return false;
+  update = false;
+  setTimeout(() => (update = true), 1000 / 75);
+  return true;
+};
+
 function resize(event: PointerEvent<HTMLDivElement>) {
   event.preventDefault();
   const target = event.currentTarget;
@@ -457,12 +484,16 @@ function resize(event: PointerEvent<HTMLDivElement>) {
   parent.dataset.x = event.clientX + '';
   parent.dataset.y = event.clientY + '';
 
-  let position = target.classList[1].split('-')[1];
+  const position = target.classList[1].split('-')[1];
 
   document.onpointermove = (e) => {
     document.body.style.cursor = position + '-resize';
-    resizing(e as any, target.parentElement as any, position, rect);
+    const parentElement = target.parentElement;
+    if (!parentElement) return;
+
+    resizing(e, target.parentElement, position, rect);
   };
+
   document.onpointerup = () => {
     document.body.style.cursor = '';
     document.onpointermove = null;
@@ -470,12 +501,14 @@ function resize(event: PointerEvent<HTMLDivElement>) {
 }
 
 function resizing(
-  event: PointerEvent<HTMLDivElement>,
-  element: HTMLDivElement,
+  event: PointerEvent<HTMLDivElement> | globalThis.PointerEvent,
+  element: HTMLElement,
   position = 'n',
   irect: DOMRect
 ) {
   event.preventDefault();
+  if (!ready()) return;
+
   const target = element;
   if (!target?.classList.contains('app-window')) return;
   if (!(event.clientX && event.clientY)) return;
@@ -490,10 +523,10 @@ function resizing(
   const rect = irect;
   const x = Number(target.dataset.x);
   const y = Number(target.dataset.y);
-  let bottom = innerHeight - (rect.y + rect.height);
-  let right = innerWidth - (rect.x + rect.width);
-  let left = rect.left;
-  let top = rect.top;
+  const bottom = innerHeight - (rect.y + rect.height);
+  const right = innerWidth - (rect.x + rect.width);
+  const left = rect.left;
+  const top = rect.top;
 
   if (clientX <= 0) return;
   if (clientY <= 0) return;
@@ -546,7 +579,7 @@ function dragMouseDown(
   target.dataset.x = e.clientX + '';
   target.dataset.y = e.clientY + '';
 
-  document.onmouseup = () => {
+  document.onpointerup = () => {
     const rect = target.getBoundingClientRect();
 
     if (rect.top < 0) target.style.top = 0 + 'px';
@@ -558,17 +591,27 @@ function dragMouseDown(
 
     setPos(target);
 
-    document.onmouseup = null;
-    document.onmousemove = null;
+    document.onpointerup = null;
+    document.onpointermove = null;
     document.body.style.cursor = '';
   };
-  document.onmousemove = (e) => elementDrag(e, target, app);
+  document.onpointermove = (e) => {
+    elementDrag(e, target, app);
+  };
 }
 
-function elementDrag(e: any, target: HTMLDivElement, app: ReturnType<AppType>) {
+function elementDrag(
+  e: globalThis.PointerEvent,
+  target: HTMLDivElement,
+  app: ReturnType<AppType>
+) {
   e = e || window.event;
+
+  if (!ready()) return;
+
   const newX = Number(target.dataset.x) - e.clientX;
   const newY = Number(target.dataset.y) - e.clientY;
+
   target.dataset.x = e.clientX + '';
   target.dataset.y = e.clientY + '';
 

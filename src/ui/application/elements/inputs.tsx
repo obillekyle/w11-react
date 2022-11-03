@@ -63,6 +63,7 @@ export const Select = (props: SelectProps) => {
               background: '#80808060',
             },
             '&::after': {
+              // eslint-disable-next-line quotes
               content: "''",
               background: e.colors.blue[5],
               borderRadius: 999,
@@ -92,7 +93,7 @@ export const Input = (props: TextInputProps) => {
   return (
     <T
       {...props}
-      styles={(e) => ({
+      styles={{
         input: {
           color: 'white',
           width: v(props.width ?? 120),
@@ -108,7 +109,7 @@ export const Input = (props: TextInputProps) => {
             color: 'whitesmoke',
           },
         },
-      })}
+      }}
     />
   );
 };

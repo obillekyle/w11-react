@@ -1,12 +1,20 @@
 import useIDB, { IDBFunc } from '@api/idb';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import Image from 'image-js';
 import { addListener, launch, stop } from 'devtools-detector';
 import CrashHandler from '@ui/crash';
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+
 const default_func = {
-  get: (key: string, d?: any) => d,
-  set: (key: string, v: any) => {},
-  remove: () => {},
+  get: (key: string, d?: unknown) => d,
+  set: () => void '',
+  remove: () => void '',
 };
 
 const OS = createContext<Record<'settings' | 'system' | 'user', IDBFunc>>({
@@ -20,7 +28,7 @@ export const useSettings = () => useContext(OS).settings;
 export const useSystem = () => useContext(OS).system;
 export const useUsers = () => useContext(OS).user;
 
-const OperatingSystem = ({ children }: any) => {
+const OperatingSystem = (props: { children: ReactNode }) => {
   const [open, setOpen] = useState(false);
   const settings = useIDB('settings');
   const system = useIDB('system');
@@ -43,14 +51,14 @@ const OperatingSystem = ({ children }: any) => {
 
   const errored = settings.error || system.error || user.error;
   if (errored) return crash('database_initialization_failed');
-  if (!window['chrome' as any]) return crash('unsupported_platform');
+  if (!window['chrome']) return crash('unsupported_platform');
   if (import.meta.env.PROD && open) return crash('devtools_open');
 
   return (
     <OS.Provider value={{ settings, system, user }}>
       <Startup />
       <Variables />
-      <div>{children}</div>
+      {props.children}
     </OS.Provider>
   );
 };
@@ -60,7 +68,7 @@ async function cacheWallpaper(settings: IDBFunc) {
   const wcache: WCache = settings.get('wallpaper-cache');
 
   if (!wallpaper) return;
-  if (wallpaper.type == 'color') return;
+  if (wallpaper.type != 'image') return;
   if (wallpaper.url == wcache?.url ?? '') return;
 
   const data = (await Image.load(wallpaper.url))
@@ -76,7 +84,7 @@ function Startup() {
   const wallpaper = settings.get('wallpaper');
 
   useEffect(() => {
-    settings.set('boot-times', (v: any) => (v ?? 0) + 1);
+    settings.set('boot-times', (v) => (v ?? 0) + 1);
 
     if (!wallpaper)
       settings.set('wallpaper', {
@@ -108,7 +116,10 @@ function Variables() {
   const settings = useSettings();
   const wallpaper = settings.get('wallpaper') as Wallpaper;
   const wcache = settings.get('wallpaper-cache') as WCache;
-  const obj = useMemo(() => getWallpaperObject(wallpaper), [wallpaper]);
+  const obj = useMemo(
+    () => getWallpaperObject(wallpaper),
+    [wallpaper && wcache]
+  );
 
   return (
     <style>
@@ -120,7 +131,11 @@ function Variables() {
         --wp: ${obj.url};
         --wp-size: ${obj.size};
         --wp-repeat: ${obj.repeat}; 
-        --wp-cache: ${!!wcache ? `url(${wcache.cache})` : obj.url}
+        --wp-cache: ${
+          wcache && wallpaper?.type != 'color'
+            ? `url(${wcache.cache})`
+            : obj.url
+        }
       }
     `}
     </style>

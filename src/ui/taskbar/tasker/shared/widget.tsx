@@ -1,4 +1,4 @@
-import Taskbar from "../..";
+import Taskbar from '@ui/taskbar';
 
 const Widget = () => {
   const hidden = true;

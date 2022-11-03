@@ -5,8 +5,7 @@
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "#api/*": ["./src/api/*"],
-      "#ui/*": ["./src/ui/*"]
+      "@*": ["./src/*"]
     }
   },
   "include": ["vite.config.ts"]

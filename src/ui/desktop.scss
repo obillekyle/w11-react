@@ -2,14 +2,19 @@
 
 .desktop-main {
   background-color: black;
-  background-image: var(--wp, url('/assets/Web/4k/Wallpapers/default.jpg'));
   width: 100vw;
   height: 100vh;
   padding-bottom: v(48px);
-  background-repeat: var(--wp-repeat, no-repeat);
-  background-position: var(--wp-position, center);
-  background-size: var(--wp--attachment, cover);
   position: relative;
+  &::before {
+    position: absolute;
+    inset: 0 0 0 0;
+    content: '';
+    background: var(--wp, url('/assets/Web/4k/Wallpapers/default.jpg'));
+    background-repeat: var(--wp-repeat, no-repeat);
+    background-position: var(--wp-position, center);
+    background-size: var(--wp--attachment, cover);
+  }
 }
 
 .not-windows-version {

@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { useInterval } from 'usehooks-ts';
 import './crash.scss';
-const CrashHandler = ({ error = '' }) => {
+
+type CrashHandlerProps = {
+  error: string;
+};
+
+const CrashHandler = ({ error }: CrashHandlerProps) => {
   const [v, sv] = useState(0);
   useInterval(() => {
     v > 80 ? location.reload() : sv((v) => v + 20);
