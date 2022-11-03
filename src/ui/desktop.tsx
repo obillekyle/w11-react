@@ -1,17 +1,13 @@
 import { ReactNode } from 'react';
-import { useSystem } from '../os';
-import './desktop.scss';
 import { useDWM, Windows } from './window';
+import './desktop.scss';
 
 type DesktopProps = {
   children?: ReactNode;
 };
 
 const Desktop = ({ children }: DesktopProps) => {
-  const system = useSystem();
   const wm = useDWM();
-
-  const user = system.get('current_user', 'user') as string;
 
   return (
     <div
@@ -20,19 +16,23 @@ const Desktop = ({ children }: DesktopProps) => {
     >
       <Windows />
       {children}
-      <WinVer ver="10607.rs_prerelease.221101-1001" />
+      <WindowsVersion version="10607.rs_prerelease.221101-1001" />
     </div>
   );
 };
 
-const WinVer = ({ ver = '1' }) => {
-  return (
+type WindowsVersionProps = {
+  version?: string;
+};
+
+const WindowsVersion = ({ version }: WindowsVersionProps) => {
+  return version ? (
     <div className="not-windows-version">
       Not Windows 11 Pro Debug
       <br />
-      Evaluation copy. Build {ver}
+      Evaluation copy. Build {version}
     </div>
-  );
+  ) : null;
 };
 
 export default Desktop;

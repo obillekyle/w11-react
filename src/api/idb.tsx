@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useLayoutEffect, useState } from 'react';
+import { now } from 'lodash';
 import Dexie from 'dexie';
-import _, { now } from 'lodash';
 
 import { execute } from './util';
 import { useCallback } from 'react';

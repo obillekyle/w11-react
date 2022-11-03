@@ -5,7 +5,6 @@ import {
   HTMLAttributes,
   MouseEvent,
   ReactNode,
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -35,7 +34,7 @@ type SubMenuProps =
       right?: ReactNode;
       shortcut?: string;
       label: ReactNode;
-      onClick?: (arg: MouseEvent<HTMLDivElement>) => any;
+      onClick?: (arg: MouseEvent<HTMLDivElement>) => void;
       nodeProps?: HTMLAttributes<HTMLDivElement>;
     };
 
@@ -87,15 +86,20 @@ export const Toolbar = ({ options }: ToolbarProps) => {
                 <div
                   ref={ref}
                   onMouseEnter={() => !focus && sH(key)}
-                  className={cx(`app-ui-toolbar-item`, focus && f && 'active')}
+                  className={cx('app-ui-toolbar-item', focus && f && 'active')}
                 >
                   {key}
                 </div>
               </Popover.Target>
               <Popover.Dropdown className="app-ui-toolbar-menu">
-                {object.submenu.map((sub) => {
+                {object.submenu.map((sub, index) => {
                   if (sub.type == 'divider') {
-                    return <div className="app-ui-toolbar-menu-divider" />;
+                    return (
+                      <div
+                        className="app-ui-toolbar-menu-divider"
+                        key={index}
+                      />
+                    );
                   }
 
                   if (sub.type == 'item') {
@@ -108,6 +112,7 @@ export const Toolbar = ({ options }: ToolbarProps) => {
 
                     return (
                       <div
+                        key={index}
                         {...sub.nodeProps}
                         onClick={(e) => {
                           sub.onClick?.(e);
@@ -118,17 +123,9 @@ export const Toolbar = ({ options }: ToolbarProps) => {
                           sub.nodeProps?.className
                         )}
                       >
-                        <div className="app-ui-toolbar-menu-icon" data-icon>
-                          {icon}
-                        </div>
-                        <div className="app-ui-toolbar-menu-label" data-label>
-                          {sub.label}
-                        </div>
-                        {!!sub.right && (
-                          <div className="app-ui-toolbar-menu-right" data-right>
-                            {sub.right}
-                          </div>
-                        )}
+                        <div data-icon>{icon}</div>
+                        <div data-label>{sub.label}</div>
+                        {!!sub.right && <div data-right>{sub.right}</div>}
                       </div>
                     );
                   }

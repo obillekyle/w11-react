@@ -1,4 +1,4 @@
-import Taskbar from "../..";
+import Taskbar from '../..';
 
 const StartButton = () => {
   return (

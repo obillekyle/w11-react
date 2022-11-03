@@ -19,7 +19,11 @@ function App() {
             file: {
               show: true,
               submenu: [
-                { type: 'item', label: 'Save As...', onClick: app.close },
+                {
+                  type: 'item',
+                  label: 'Save As...',
+                  onClick: () => app.close(),
+                },
               ],
             },
             wow: {

@@ -8,10 +8,7 @@ export type IconProps = {
 } & HTMLAttributes<SVGSVGElement>;
 
 export const Icon = forwardRef<SVGSVGElement, IconProps>(
-  (
-    { icon, size = 'auto', style, color = 'currentColor', fontSize, ...props },
-    ref
-  ) => {
+  ({ icon, size, style, color, fontSize, ...props }, ref) => {
     return (
       <svg
         ref={ref}
@@ -25,5 +22,11 @@ export const Icon = forwardRef<SVGSVGElement, IconProps>(
     );
   }
 );
+
+Icon.displayName = 'UI-Icon';
+Icon.defaultProps = {
+  size: 'auto',
+  color: 'currentColor',
+};
 
 export default Icon;
