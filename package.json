@@ -16,6 +16,7 @@
     "@iconify/react": "^4.0.0",
     "@mantine/core": "^5.6.4",
     "@mantine/hooks": "^5.6.4",
+    "cuid": "^2.1.8",
     "dayjs": "^1.11.6",
     "devtools-detector": "^2.0.12",
     "dexie": "^3.2.2",

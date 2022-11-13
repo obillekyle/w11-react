@@ -13,6 +13,7 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "noErrorTruncation": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
@@ -20,5 +21,6 @@
     }
   },
   "include": ["src"],
+  "defaultMaximumTruncationLength": 2000,
   "references": [{ "path": "./tsconfig.node.json" }]
 }

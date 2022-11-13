@@ -19,7 +19,7 @@
   "plugins": ["react", "@typescript-eslint"],
   "rules": {
     "linebreak-style": ["error", "unix"],
-    "quotes": ["error", "single"],
+    "quotes": [2, "single", { "avoidEscape": true }],
     "semi": ["error", "always"],
     "react/jsx-uses-react": "off",
     "react/react-in-jsx-scope": "off",
