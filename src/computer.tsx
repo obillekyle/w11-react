@@ -6,16 +6,19 @@ import Taskbar from '@ui/taskbar';
 import { WindowManager } from '@ui/window';
 import BootManager from './boot';
 import OperatingSystem from './os';
+import CrashHandler from '@ui/crash';
 
 function Computer() {
   return (
     <MantineProvider>
       <BootManager>
-        <OperatingSystem>
-          <WindowManager>
-            <App />
-          </WindowManager>
-        </OperatingSystem>
+        <CrashHandler>
+          <OperatingSystem>
+            <WindowManager>
+              <App />
+            </WindowManager>
+          </OperatingSystem>
+        </CrashHandler>
       </BootManager>
     </MantineProvider>
   );

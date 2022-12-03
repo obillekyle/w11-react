@@ -1,18 +1,26 @@
-import { useState } from 'react';
+import { createContext, ReactNode, useContext, useState } from 'react';
 import { useInterval } from 'usehooks-ts';
 import './crash.scss';
 
 type CrashHandlerProps = {
-  error: string;
+  children: ReactNode;
 };
 
-const CrashHandler = ({ error }: CrashHandlerProps) => {
+const Crash = createContext((message: string) => {
+  return null;
+  message;
+});
+export const useCrash = () => useContext(Crash);
+
+const CrashHandler = ({ children }: CrashHandlerProps) => {
   const [v, sv] = useState(0);
+  const [crash, setCrash] = useState('');
   useInterval(() => {
+    if (!crash) return;
     v > 80 ? location.reload() : sv((v) => v + 20);
   }, 1370);
 
-  return (
+  return crash ? (
     <div className="crash-screen">
       <div className="crash-container">
         <div className="crash-header">:(</div>
@@ -33,12 +41,21 @@ const CrashHandler = ({ error }: CrashHandlerProps) => {
             https://www.windows.com/stopcode
             <div className="crash-code">
               If you call a support person, give them this info: <br />
-              Stop code: {error.toUpperCase()}
+              Stop code: {crash.toUpperCase()}
             </div>
           </div>
         </div>
       </div>
     </div>
+  ) : (
+    <Crash.Provider
+      value={(m) => {
+        setCrash(m);
+        return null;
+      }}
+    >
+      {children}
+    </Crash.Provider>
   );
 };
 

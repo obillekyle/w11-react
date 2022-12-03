@@ -1,12 +1,12 @@
 import { Icon } from '@iconify/react';
 import { HTMLAttributes, ReactNode, useState } from 'react';
-import ProgressRing from '@ui/progress';
 import { useApplication, useDWM } from '@ui/window';
-import UI from '@ui/application';
-import './index.scss';
-import test2 from './test';
 import { useSettings } from '@os';
 import { cx } from '@api/util';
+import ProgressRing from '@ui/progress';
+import UI from '@ui/application';
+import test2 from './test';
+import './index.scss';
 
 const test = {
   id: 'com.test',
@@ -30,11 +30,11 @@ type List =
     };
 
 function App() {
+  const wm = useDWM();
   const store = useSettings();
+  const application = useApplication();
   const scale = store.get('scaling', 1);
   const timing = store.get('timing', 1);
-  const application = useApplication();
-  const wm = useDWM();
 
   const [ring, setRing] = useState<[number, number]>([48, 6]);
 

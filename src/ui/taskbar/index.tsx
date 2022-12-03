@@ -10,7 +10,7 @@ import SystemTaskbar from './system';
 import Widget from './widget';
 import Tasker from './tasker';
 import './index.scss';
-import { useSettings } from '../../os';
+import { useSettings } from '@os';
 
 type TaskbarButton = {
   active?: boolean;

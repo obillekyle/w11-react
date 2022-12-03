@@ -1,52 +1,68 @@
 import _ from 'lodash';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDWM } from '../../window';
 import SearchButton from './internal/search';
 import StartButton from './internal/start';
 import TaskView from './internal/taskview';
 import Widget from './shared/widget';
 import Preview from './shared/preview';
 import { useSettings } from '../../../os';
+import { useDWM } from '@ui/window';
 
-type PinProps = {
-  id: string;
-  icon: string;
-  name: string;
-  exec: string;
-};
+// BUG vite hmr spams indefinitely
+
+// type PinProps = {
+//   id: string;
+//   icon: string;
+//   name: string;
+//   exec: string;
+// };
+
+// const getApp = async (app: string): Promise<AppProps | undefined> => {
+//   const applet = await import(`../../../apps/${app}/index.tsx`);
+//   if (!(applet && applet.default)) return undefined;
+//   return applet.default;
+// };
 
 const Tasker = () => {
   const wm = useDWM();
   const [w] = wm.window;
   const store = useSettings();
-  const [ap, setAp] = useState<PinProps[]>([]);
+  // const [ap, setAp] = useState<PinProps[]>([]);
 
-  const pinned = useMemo(
-    () => store.get('pinned', ['test', 'chrome']),
-    [store]
-  );
+  const pinned = store.get('pinned', [
+    {
+      exec: 'chrome',
+      icon: '/assets/application/com.google.chrome.svg',
+      name: 'Google Chrome',
+      id: 'com.google.chrome',
+    },
+    {
+      exec: 'test',
+      icon: '/assets/application/settings_gear.svg',
+      name: 'Testing',
+      id: 'com.test',
+    },
+  ]);
+  // const getPinned = useCallback(async () => {
+  //   const pin: PinProps[] = [];
+  //   console.log('update', '1');
+  //   pinned.map(async (curr) => {
+  //     const app = await getApp(curr);
+  //     if (!app) return;
+  //     pin.push({
+  //       exec: curr,
+  //       icon: app.icon || '/assets/Application.svg',
+  //       name: app.name || 'Application',
+  //       id: app.id,
+  //     } as PinProps);
+  //   });
 
-  const getPinned = useCallback(async () => {
-    const pin = pinned.map(async (p) => {
-      const app = (await import(`../../../apps/${p}/index.tsx`)).default;
-      return {
-        exec: p,
-        icon: app.icon || '/assets/Application.svg',
-        name: app.name || 'Application',
-        id: app.id,
-      } as PinProps;
-    });
+  //   setAp(pin);
+  // }, pinned);
 
-    setAp(await Promise.all(pin));
-  }, [pinned, w]);
-
-  useEffect(() => {
-    getPinned().then();
-  }, []);
-
-  useEffect(() => {
-    getPinned().then();
-  }, [pinned, w]);
+  // useEffect(() => {
+  //   getPinned();
+  //   return () => setAp([]);
+  // }, pinned);
 
   return (
     <div className="tasker">
@@ -54,7 +70,7 @@ const Tasker = () => {
       <SearchButton />
       <TaskView />
       <Widget />
-      {_.map(ap, (app, o) => (
+      {_.map(pinned, (app, o) => (
         <Preview app={app} appId={app.id} key={o} pinned={true} />
       ))}
       {_.map(w.opened, (app, o) => {

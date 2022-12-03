@@ -4,11 +4,12 @@ import { ReactNode, useEffect, useState } from 'react';
 type BootManagerProps = {
   children: ReactNode;
 };
+
 const BootManager = ({ children }: BootManagerProps) => {
   const [boot, setBoot] = useState(false);
 
   useEffect(() => {
-    setInterval(() => setBoot(true), 1000);
+    setTimeout(() => setBoot(true), 1000);
   }, []);
 
   if (boot) return <>{children}</>;

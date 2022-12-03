@@ -2,11 +2,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import cuid from 'cuid';
 import { Dexie } from 'dexie';
-import _, { now } from 'lodash';
+import _, { isNumber, last, now } from 'lodash';
 import { useEffect, useState } from 'react';
 import './types';
 import {
-  lastMod,
   PartitionDB,
   Byte,
   StorageState,
@@ -19,6 +18,7 @@ import {
   Folder,
   FolderContent,
   FileManager,
+  UseFileManager,
 } from './types';
 
 // [ ] Add functions for files
@@ -26,60 +26,82 @@ import {
 // [ ] Clean the code
 
 class Disk extends Dexie {
-  lastMod!: Dexie.Table<lastMod>;
-  partition!: Dexie.Table<PartitionDB, number>;
+  partition!: Dexie.Table<PartitionDB | { id: 'date'; value: number }, number>;
   bytes!: Dexie.Table<Byte, number>;
 
   constructor() {
     super('VirtualDisk');
     this.version(1).stores({
       partition: '++id',
+      lastMod: '&key',
       bytes: '&address',
     });
   }
 }
 
-const disk = new Disk();
+const dp = () => [];
+dp.create = async () => undefined;
 
-export function useFileManager() {
+export const default_fm: FileManager = {
+  partition: dp,
+  getDir: () => undefined,
+  getFile: () => undefined,
+  rename: async () => false,
+  set: async () => undefined,
+  unset: async () => false,
+};
+
+const disk = new Disk();
+export function useFileManager(): UseFileManager {
   const [error, setError] = useState(false);
   const [storage, setStorage] = useState<StorageState>();
 
   useEffect(() => {
-    setInterval(async () => {
+    const interval = setInterval(async () => {
       try {
-        let lastMod = await disk.lastMod.where('key').equals('date').first();
+        let lastMod = await disk.partition.where('id').equals('date').first();
+
         if (!lastMod) {
-          lastMod = { key: 'date', value: now() };
-          await disk.lastMod.put(lastMod);
+          lastMod = { id: 'date', value: now() };
+          await disk.partition.put(lastMod);
         }
 
-        if (storage?.date == lastMod.value) return;
+        if (lastMod.id != 'date') return;
 
+        if (storage?.date == lastMod.value) return;
         const partitions = await disk.partition.toArray();
+        console.log(partitions);
         setStorage(() => {
           const partition: Partition[] = [];
 
           partitions.forEach((partitionDb) => {
-            partition.push({
-              ...partitionDb,
-              record: JSON.parse(partitionDb.record),
-            });
+            if (partitionDb.id != 'date') {
+              partition.push({
+                ...partitionDb,
+                record: JSON.parse(partitionDb.record),
+              });
+            }
           });
 
+          if (lastMod?.id != 'date') return;
           return {
             date: lastMod?.value ?? now(),
             partitions: partition,
+            loaded: true,
           };
         });
       } catch (error: unknown) {
+        console.log(error);
         setError(error as boolean);
       }
     }, 300);
-  }, []);
+    return () => clearInterval(interval);
+  }, [storage]);
 
-  if (!storage) return { loading: true, error: false };
   if (error) return { loading: false, error };
+  if (!storage) return { loading: true };
+
+  console.log(storage);
 
   function customSet(content: any, path: (string | number)[], file: any) {
     let value = content;
@@ -96,6 +118,7 @@ export function useFileManager() {
     });
     return content;
   }
+
   function customUnset(content: any, path: (string | number)[]) {
     let value = content;
     path.forEach((key, index, array) => {
@@ -108,7 +131,7 @@ export function useFileManager() {
 
   const refresh = async () => {
     try {
-      await disk.lastMod.where('key').equals('date').modify({
+      await disk.partition.where('id').equals('date').modify({
         value: now(),
       });
     } catch {
@@ -116,13 +139,15 @@ export function useFileManager() {
     }
   };
 
-  const FileMethods: FileMethodsFn = (location) => {
+  const FileMethods: FileMethodsFn = (location, newFile) => {
     const [partition, ...path] = toPath(location);
-    if (!partition) return undefined;
+    if (!isNumber(partition)) return undefined;
 
     const filePath = ['partitions', partition, 'record', ...path];
-    const file = _.get(storage, filePath) as PartitionRecord | Folder | File;
+    const file =
+      (_.get(storage, filePath) as PartitionRecord | Folder | File) ?? newFile;
 
+    if (!file) return undefined;
     if (file.$$type != 'file') return undefined;
 
     const save = async (file: File) => {
@@ -144,14 +169,14 @@ export function useFileManager() {
           .where('id')
           .equals(partition)
           .modify((oldPart, ctx) => {
-            ctx.value = {
-              ...oldPart,
-              record: JSON.stringify(part.record),
-            };
+            if (oldPart.id != 'date') {
+              ctx.value = {
+                ...oldPart,
+                record: JSON.stringify(part.record),
+              };
+            }
           });
-        await disk.lastMod.where('key').equals('date').modify({
-          value: now(),
-        });
+        await refresh();
       } catch {
         return false;
       }
@@ -196,7 +221,7 @@ export function useFileManager() {
       ...file,
       $attributes: getAttributeProp(),
       async $delete() {
-        if (!partition) return false;
+        if (!isNumber(partition)) return false;
         let copyStorage: any = undefined;
 
         try {
@@ -212,10 +237,12 @@ export function useFileManager() {
             .where('id')
             .equals(partition)
             .modify((pDB, ctx) => {
-              ctx.value = {
-                ...pDB,
-                record: copyStorage.partitions[partition].record,
-              };
+              if (pDB.id != 'date') {
+                ctx.value = {
+                  ...pDB,
+                  record: copyStorage.partitions[partition].record,
+                };
+              }
             });
 
           await disk.bytes.where('address').equals(file.$$data).delete();
@@ -258,10 +285,12 @@ export function useFileManager() {
             .where('id')
             .anyOf([partition, part])
             .modify((pDB, ctx) => {
-              ctx.value = {
-                ...pDB,
-                record: JSON.stringify(copyStorage.partitions[pDB.id].record),
-              };
+              if (pDB.id != 'date') {
+                ctx.value = {
+                  ...pDB,
+                  record: JSON.stringify(copyStorage.partitions[pDB.id].record),
+                };
+              }
             });
         } catch {
           return false;
@@ -283,21 +312,35 @@ export function useFileManager() {
   function FolderMethods(
     location: string
   ): (Folder & FolderMethods) | undefined;
-  function FolderMethods(location: string, root?: boolean) {
+  function FolderMethods(
+    location: string,
+    root: false,
+    newFolder: Folder
+  ): (Folder & FolderMethods) | undefined;
+  function FolderMethods(
+    location: string,
+    root: true,
+    newPartition: PartitionRecord
+  ): (PartitionRecord & FolderMethods) | undefined;
+  function FolderMethods(
+    location: string,
+    root?: boolean,
+    newFolder?: Folder | PartitionRecord
+  ) {
     let [partition, ...extra] = toPath(location);
-    if (!partition) return undefined;
+    if (!isNumber(partition)) return undefined;
 
     const folderPath = ['partitions', partition, 'record', ...extra];
-    const folder = _.get(storage, folderPath) as
-      | PartitionRecord
-      | Folder
-      | File;
+    let folder =
+      (_.get(storage, folderPath) as PartitionRecord | Folder | File) ??
+      newFolder;
 
+    if (!folder) return undefined;
     if (folder.$$type == 'file') return undefined;
 
     const save = async (folder: Folder) => {
       let storage: StorageState;
-      if (!partition) return false;
+      if (!isNumber(partition)) return false;
 
       try {
         setStorage((current) => {
@@ -315,14 +358,14 @@ export function useFileManager() {
           .where('id')
           .equals(partition)
           .modify((oldPart, ctx) => {
-            ctx.value = {
-              ...oldPart,
-              record: JSON.stringify(part.record),
-            };
+            if (oldPart.id != 'date') {
+              ctx.value = {
+                ...oldPart,
+                record: JSON.stringify(part.record),
+              };
+            }
           });
-        await disk.lastMod.where('key').equals('date').modify({
-          value: now(),
-        });
+        await refresh();
       } catch {
         return false;
       }
@@ -351,7 +394,7 @@ export function useFileManager() {
         ...folder,
         $attributes: getAttributeProp(),
         $delete: async () => false,
-        $location: `${partition}:/${folderPath.join('/')}`,
+        $location: `${partition}:/${extra.join('/')}`,
         $contents() {
           const keys = Object.keys(folder).filter((k) => !k.startsWith('$'));
           let contents = {} as FolderContent;
@@ -377,7 +420,7 @@ export function useFileManager() {
         },
 
         async $rename(newName) {
-          if (!partition) return false;
+          if (!isNumber(partition)) return false;
 
           try {
             setStorage((storage) => {
@@ -391,12 +434,12 @@ export function useFileManager() {
               .where('id')
               .equals(partition)
               .modify((part, ctx) => {
-                if (!part) return false;
-
-                ctx.value = {
-                  ...part,
-                  label: newName,
-                };
+                if (part.id != 'date') {
+                  ctx.value = {
+                    ...part,
+                    label: newName,
+                  };
+                }
               });
           } catch {
             return false;
@@ -411,10 +454,10 @@ export function useFileManager() {
       const final: Folder & FolderMethods = {
         ...folder,
         $attributes: getAttributeProp(),
-        $location: `${partition}:/${folderPath.join('/')}`,
+        $location: `${partition}:/${extra.join('/')}`,
 
         $delete: async () => {
-          if (!partition) return false;
+          if (!isNumber(partition)) return false;
           let copyStorage: any = undefined;
 
           try {
@@ -429,16 +472,13 @@ export function useFileManager() {
             await disk.partition
               .where('id')
               .equals(partition)
-              .modify((partitions, ctx) => {
-                if (!(storage && partition)) {
-                  return false;
+              .modify((part, ctx) => {
+                if (part.id != 'date') {
+                  ctx.value = {
+                    ...part,
+                    record: JSON.stringify(copyStorage.part[part.id].record),
+                  };
                 }
-                ctx.value = {
-                  ...partitions,
-                  record: JSON.stringify(
-                    copyStorage.partitions[partition].record
-                  ),
-                };
               });
           } catch {
             return false;
@@ -502,10 +542,14 @@ export function useFileManager() {
               .where('id')
               .anyOf(part, partition)
               .modify((pDB, ctx) => {
-                ctx.value = {
-                  ...pDB,
-                  record: JSON.stringify(copyStorage.partitions[pDB.id].record),
-                };
+                if (pDB.id != 'date') {
+                  ctx.value = {
+                    ...pDB,
+                    record: JSON.stringify(
+                      copyStorage.partitions[pDB.id].record
+                    ),
+                  };
+                }
               });
           } catch {
             return false;
@@ -521,14 +565,54 @@ export function useFileManager() {
     return undefined;
   }
 
-  const fm: FileManager = {
+  const partition: FileManager['partition'] = () => {
+    return storage.partitions
+      .map((part) => {
+        const methods = FolderMethods(part.id + ':/', true, part.record);
+
+        if (methods) {
+          return {
+            id: part.id,
+            methods,
+          };
+        }
+      })
+      .filter((p) => p) as any;
+  };
+  partition.create = async (label) => {
+    let id = -1;
+    const record: PartitionRecord = {
+      $$attr: {},
+      $$icon: '',
+      $$type: 'root',
+    };
+    try {
+      const last = await disk.partition.where('id').notEqual('date').last();
+      if (last?.id != 'date') {
+        id = (last?.id ?? -1) + 1;
+        const partition: PartitionDB = {
+          id,
+          label,
+          record: JSON.stringify(record),
+        };
+
+        await disk.partition.add(partition);
+        await refresh();
+      }
+    } catch {
+      return undefined;
+    }
+
+    return FolderMethods(id + ':/', true, record);
+  };
+
+  const fm: FileManager & { loading: false; error: false } = {
     loading: false,
     error: false,
+    partition,
     getDir: (location) =>
       FolderMethods(location) ?? FolderMethods(location, true),
-    getFile(location) {
-      return FileMethods(location);
-    },
+    getFile: FileMethods,
     rename: async (location, newLocation) => {
       const content =
         FileMethods(location) ??
@@ -541,9 +625,10 @@ export function useFileManager() {
     },
     set: async (location, value, stream?: Blob) => {
       const [part, ...path] = toPath(location);
-      if (!part) return false;
+      if (!isNumber(part)) return undefined;
       const newPath = ['partitions', part, 'record', ...path];
       let copyStorage: any = undefined;
+      const address = cuid();
 
       try {
         if (value.$$type == 'folder') {
@@ -559,17 +644,16 @@ export function useFileManager() {
             .where('id')
             .equals(part)
             .modify((obj, ctx) => {
-              if (!copyStorage) return false;
-
-              ctx.value = {
-                ...obj,
-                record: JSON.stringify(copyStorage.partitions[part].record),
-              };
+              if (obj.id != 'date') {
+                ctx.value = {
+                  ...obj,
+                  record: JSON.stringify(copyStorage.partitions[part].record),
+                };
+              }
             });
         }
 
         if (value.$$type == 'file') {
-          const address = cuid();
           setStorage((storage) => {
             if (!storage) return storage;
 
@@ -582,12 +666,12 @@ export function useFileManager() {
             .where('id')
             .equals(part)
             .modify((obj, ctx) => {
-              if (!copyStorage) return false;
-
-              ctx.value = {
-                ...obj,
-                record: JSON.stringify(copyStorage.partitions[part].record),
-              };
+              if (obj.id != 'date') {
+                ctx.value = {
+                  ...obj,
+                  record: JSON.stringify(copyStorage.partitions[part].record),
+                };
+              }
             });
 
           await disk.bytes.add({
@@ -597,10 +681,20 @@ export function useFileManager() {
         }
       } catch {
         console.error('Set Failure');
-        return false;
+        return undefined;
       }
 
-      return true;
+      return (
+        value.$$type == 'file'
+          ? FileMethods(location, {
+              ...value,
+              $$data: address,
+            })
+          : FolderMethods(location, false, {
+              ...value,
+              $$icon: '',
+            })
+      ) as any;
     },
 
     unset: async (location) => {

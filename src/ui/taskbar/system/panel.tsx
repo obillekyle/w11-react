@@ -8,6 +8,7 @@ import { useLayoutEffect, useState } from 'react';
 import Taskbar from '..';
 import UI from '@ui/application';
 import { useSettings } from '../../../os';
+import { v } from '@api/util';
 
 const Panel = () => {
   return (
@@ -44,11 +45,11 @@ type NetworkConnection =
     };
 
 function getConnectionInfo(): NetworkConnection {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nav = window.navigator as any;
-  const online = navigator.onLine;
-  const connection = nav['connection'];
+  const online = nav.onLine;
+  const connection = 'connection' in nav ? nav.connection : undefined;
 
+  // console.log('The Connection', window.navigator);
   if (!connection) return { online, type: 'unknown' };
 
   return {
@@ -65,6 +66,7 @@ const Internet = () => {
 
   useLayoutEffect(() => {
     interval.start();
+    setConnection(getConnectionInfo);
     return interval.stop;
   }, []);
 
@@ -101,10 +103,18 @@ const Internet = () => {
 
 const getAudioDevices = async () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nav = window.navigator as any;
-  const media: (MediaDeviceInfo | InputDeviceInfo)[] = nav['mediaDevices']
-    ? await nav.mediaDevices.enumerateDevices()
-    : undefined;
+  const nav = window.navigator;
+
+  if (
+    (await navigator.permissions.query({ name: 'microphone' as any })).state ==
+    'prompt'
+  ) {
+    const tracks = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+    });
+    tracks.getTracks().forEach((track) => track.stop());
+  }
+  const media: MediaDeviceInfo[] = await nav.mediaDevices.enumerateDevices();
   const audio: MediaDeviceInfo[] = media.filter((m) => m.kind == 'audiooutput');
   const names = audio.map((i) => i.label);
   return names;
@@ -132,7 +142,7 @@ const Volume = () => {
 
   return (
     <Taskbar.Tooltip label={`${defaultDevice ?? 'Browser Speakers'}: 69%`}>
-      <UI.Icon icon="sound-2" size={20 * scaling} />
+      <UI.Icon icon="sound-2" size={20 * scaling} style={{ height: v(34) }} />
     </Taskbar.Tooltip>
   );
 };
@@ -258,7 +268,7 @@ const Battery = () => {
           },
         }}
       >
-        <Icon icon={icon} height={38 * scaling} width={20 * scaling} />
+        <Icon icon={icon} height={34 * scaling} width={20 * scaling} />
       </Indicator>
     </Taskbar.Tooltip>
   );

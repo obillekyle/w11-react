@@ -55,7 +55,8 @@ export type FolderContent = Record<
 >;
 
 export type FileMethodsFn = (
-  location: string
+  location: string,
+  newFile?: File
 ) => (File & FileMethods) | undefined;
 
 export type FolderMethodsFn = (
@@ -81,19 +82,23 @@ export type PartitionDB = {
 };
 
 export type FileManager = {
-  loading: false;
-  error: false;
+  partition: {
+    (): ((PartitionRecord & FolderMethods) & { id: number })[];
+    create: (
+      label: string
+    ) => Promise<(PartitionRecord & FolderMethods) | undefined>;
+  };
   getDir(
     location: string
-  ): (Folder & FolderMethods) | (PartitionRecord & FolderMethods) | undefined;
+  ): ((Folder | PartitionRecord) & FolderMethods) | undefined;
   getFile(location: string): (File & FileMethods) | undefined;
   set: {
-    (
-      location: string,
-      value: Omit<File, '$$data'>,
-      stream: Blob
-    ): Promise<boolean>;
-    (location: string, value: Omit<Folder, '$$icon'>): Promise<boolean>;
+    (location: string, value: Omit<Folder, '$$icon'>): Promise<
+      (Folder & FolderMethods) | undefined
+    >;
+    (location: string, value: Omit<File, '$$data'>, stream: Blob): Promise<
+      (File & FileMethods) | undefined
+    >;
   };
   unset(location: string): Promise<boolean>;
   rename(location: string, newLocation: string): Promise<boolean>;
@@ -102,16 +107,19 @@ export type FileManager = {
 export type UseFileManager =
   | {
       loading: true;
-      error: false;
     }
   | {
       loading: false;
       error: true;
     }
-  | FileManager;
+  | ({
+      loading: false;
+      error: false;
+    } & FileManager);
 
 export type StorageState =
   | {
+      loaded: boolean;
       date: number;
       partitions: Partition[];
     }

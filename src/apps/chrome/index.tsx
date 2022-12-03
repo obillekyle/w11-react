@@ -1,4 +1,5 @@
 import { AppProps } from '@ui/window';
+import './index.scss';
 
 const chrome: AppProps = {
   onlyOne: true,
